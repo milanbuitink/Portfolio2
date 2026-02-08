@@ -25,7 +25,7 @@ export interface Project {
 export const projects: Project[] = [
   {
     id: "1",
-    title: "Urban Landscapes",
+    title: "TIMBER TUNES",
     slug: "urban-landscapes",
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2024",
@@ -39,7 +39,7 @@ export const projects: Project[] = [
   },
   {
     id: "2",
-    title: "Portraits of Silence",
+    title: "SLOTERDIJK",
     slug: "portraits-of-silence",
     description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
     year: "2024",
@@ -53,7 +53,7 @@ export const projects: Project[] = [
   },
   {
     id: "3",
-    title: "Natural Elements",
+    title: "VILLA 10A",
     slug: "natural-elements",
     description: "De kracht en sereniteit van de natuur, vastgelegd in zijn meest pure vorm.",
     year: "2023",
@@ -66,7 +66,7 @@ export const projects: Project[] = [
     ],
   },
   {
-    id: "4",
+    id: "NIEUWE MOLENHOF",
     title: "Abstract Forms",
     slug: "abstract-forms",
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
@@ -81,7 +81,7 @@ export const projects: Project[] = [
   },
   {
     id: "5",
-    title: "Street Stories",
+    title: "PUBLIC BUILDING",
     slug: "street-stories",
     description: "Momenten uit het dagelijks leven op straat, vol emotie en authenticiteit.",
     year: "2023",
@@ -95,7 +95,7 @@ export const projects: Project[] = [
   },
   {
     id: "6",
-    title: "Minimal Spaces",
+    title: "GRADUATION TUD",
     slug: "minimal-spaces",
     description: "Architecturale composities die de schoonheid van leegte en vorm benadrukken.",
     year: "2022",
