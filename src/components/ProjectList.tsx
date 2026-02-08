@@ -25,7 +25,7 @@ const ProjectList = () => {
           <div
             key={`image-${project.id}`}
             className={cn(
-              "fixed pointer-events-none z-30 transition-opacity duration-300 ease-out",
+              "fixed pointer-events-none z-0 transition-opacity duration-300 ease-out",
               hoveredProject === project.id ? "opacity-100" : "opacity-0"
             )}
             style={{
@@ -60,8 +60,9 @@ const ProjectList = () => {
                   onMouseLeave={() => setHoveredProject(null)}
                 >
                   <span
-                    className="text-3xl md:text-5xl lg:text-7xl font-semibold tracking-tight transition-all duration-300 group-hover:tracking-wider"
+                    className="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight transition-all duration-300 group-hover:tracking-wider"
                     style={{
+                      fontFamily: "'Montserrat', sans-serif",
                       opacity: hoveredProject
                         ? hoveredProject === project.id
                           ? 1

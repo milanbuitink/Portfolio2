@@ -21,7 +21,7 @@ export const siteConfig = {
   // ===========================================
   about: {
     // Je portretfoto URL
-    portrait: "E:\\Portfolio Website\\Portfolio ll\\images\\milan-portret.png",
+    portrait: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
     
     // Je titel/rol
     title: "Architect & Ingenieur",
@@ -44,10 +44,16 @@ export const siteConfig = {
       "Bouwtechniek",
     ],
     
+    clients: [
+      "ARUP",
+      "Herzog & de Meuron",
+      "OMA",
+    ],
+    
     // Contact informatie
     contact: {
       email: "milanbuitink03@gmail.com",
-      mobiel: "06 42444390",
+      instagram: "@milanbuitink",
     },
   },
 

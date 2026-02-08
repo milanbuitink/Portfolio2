@@ -28,7 +28,8 @@ const Header = () => {
           {/* Naam - Gecentreerd */}
           <Link
             to="/"
-            className="absolute left-1/2 -translate-x-1/2 text-sm md:text-base font-medium tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            className="absolute left-1/2 -translate-x-1/2 text-sm md:text-base font-bold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             {siteConfig.name}
           </Link>
