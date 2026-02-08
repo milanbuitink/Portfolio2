@@ -5,41 +5,44 @@ import { cn } from "@/lib/utils";
 
 const ProjectList = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePosition({
-      x: e.clientX,
-      y: e.clientY,
-    });
+  const getPreviewPosition = (index: number) => {
+    // wissel tussen vaste posities per index (aanpasbaar)
+    const positions = [
+      { left: "75%", top: "50%", imgWidth: "40vw" },
+      { left: "25%", top: "50%", imgWidth: "40vw" },
+      { left: "50%", top: "45%", imgWidth: "45vw" },
+    ];
+    return positions[index % positions.length];
   };
 
   return (
-    <div
-      className="relative min-h-screen flex items-center justify-center px-6 md:px-8"
-      onMouseMove={handleMouseMove}
-    >
-      {/* Project hover images */}
-      {projects.map((project) => (
-        <div
-          key={`image-${project.id}`}
-          className={cn(
-            "fixed pointer-events-none z-30 transition-opacity duration-300 ease-out",
-            hoveredProject === project.id ? "opacity-100" : "opacity-0"
-          )}
-          style={{
-            left: mousePosition.x,
-            top: mousePosition.y,
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          <img
-            src={project.thumbnail}
-            alt={project.title}
-            className="w-64 md:w-80 lg:w-96 h-auto object-cover"
-          />
-        </div>
-      ))}
+    <div className="relative min-h-screen flex items-center justify-center px-6 md:px-8">
+      {/* Project hover images (fixed positions per title) */}
+      {projects.map((project, index) => {
+        const pos = getPreviewPosition(index);
+        return (
+          <div
+            key={`image-${project.id}`}
+            className={cn(
+              "fixed pointer-events-none z-30 transition-opacity duration-300 ease-out",
+              hoveredProject === project.id ? "opacity-100" : "opacity-0"
+            )}
+            style={{
+              left: pos.left,
+              top: pos.top,
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <img
+              src={project.thumbnail}
+              alt={project.title}
+              style={{ width: pos.imgWidth }}
+              className="h-auto object-cover"
+            />
+          </div>
+        );
+      })}
 
       {/* Project lijst */}
       <nav className="relative z-20 text-center py-32">
