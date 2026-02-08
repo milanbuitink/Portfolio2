@@ -21,7 +21,7 @@ export const siteConfig = {
   // ===========================================
   about: {
     // Je portretfoto URL
-    portrait: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+    portrait: "images/milan-portret.png",
     
     // Je titel/rol
     title: "Architect & Ingenieur",

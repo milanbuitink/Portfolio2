@@ -60,7 +60,7 @@ const ProjectList = () => {
                   onMouseLeave={() => setHoveredProject(null)}
                 >
                   <span
-                    className="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight transition-all duration-300 group-hover:tracking-wider"
+                    className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight transition-all duration-300 group-hover:tracking-wider"
                     style={{
                       fontFamily: "'Montserrat', sans-serif",
                       opacity: hoveredProject
