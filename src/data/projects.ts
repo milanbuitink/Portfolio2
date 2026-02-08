@@ -30,7 +30,7 @@ export const projects: Project[] = [
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2024",
     category: "Photography",
-    thumbnail: "images/Timbertunes.png",
+    thumbnail: new URL('../../images/Timbertunes.png', import.meta.url).href,
     images: [
       { src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&q=80", alt: "Stadsgezicht" },
       { src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1200&q=80", alt: "Skyline" },
@@ -44,7 +44,7 @@ export const projects: Project[] = [
     description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
     year: "2024",
     category: "Portrait",
-    thumbnail: "images/pbposter.png",
+    thumbnail: new URL('../../images/pbposter.png', import.meta.url).href,
     images: [
       { src: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&q=80", alt: "Portret 1" },
       { src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80", alt: "Portret 2" },
@@ -58,7 +58,7 @@ export const projects: Project[] = [
     description: "De kracht en sereniteit van de natuur, vastgelegd in zijn meest pure vorm.",
     year: "2023",
     category: "Nature",
-    thumbnail: "images/Sloterdrdijk.png",
+    thumbnail: new URL('../../images/Sloterdijk.png', import.meta.url).href,
     images: [
       { src: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&q=80", alt: "Waterval" },
       { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80", alt: "Bergen" },
@@ -72,7 +72,7 @@ export const projects: Project[] = [
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
     year: "2023",
     category: "Abstract",
-    thumbnail: "images/graduation.png",
+    thumbnail: new URL('../../images/milan-portret.png', import.meta.url).href,
     images: [
       { src: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1200&q=80", alt: "Abstract 1" },
       { src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200&q=80", alt: "Abstract 2" },
