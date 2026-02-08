@@ -44,11 +44,10 @@ export const siteConfig = {
       "Bouwtechniek",
     ],
     
-    
     // Contact informatie
     contact: {
       email: "milanbuitink03@gmail.com",
-      mobiel: 06 42444390",
+      mobiel: "06 42444390",
     },
   },
 
