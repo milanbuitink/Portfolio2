@@ -8,17 +8,13 @@ const ProjectList = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const isMobile = useIsMobile();
   
-  // Mobile swipe state
+  // Mobile swipe state - simplified
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<"up" | "down" | null>(null);
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSnapping, setIsSnapping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const pendingDeltaRef = useRef<number | null>(null);
+  const touchStartRef = useRef(0);
 
   // Prevent page scroll when dragging on mobile by using a non-passive listener
   useEffect(() => {
@@ -36,90 +32,53 @@ const ProjectList = () => {
   }, [isDragging]);
 
   const currentProject = projects[currentProjectIndex];
-  const currentImage = currentProject?.images[currentImageIndex];
+  const nextProjectIndex = Math.min(currentProjectIndex + 1, projects.length - 1);
+  const prevProjectIndex = Math.max(currentProjectIndex - 1, 0);
 
-  // Swipe handlers
+  // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    const y = e.targetTouches[0].clientY;
-    setTouchStart(y);
-    setTouchEnd(y);
+    if (isSnapping) return;
+    touchStartRef.current = e.targetTouches[0].clientY;
     setIsDragging(true);
-    setDragY(0);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const y = e.changedTouches[0].clientY;
-    setTouchEnd(y);
-    setIsDragging(false);
-    handleSwipe();
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || isSnapping) return;
+    const currentY = e.touches[0].clientY;
+    const delta = currentY - touchStartRef.current;
+    // Apply drag resistance
+    setDragY(delta * 0.8);
+  };
+
+  const handleTouchEnd = () => {
     if (!isDragging) return;
-    const y = e.touches[0].clientY;
-    setTouchEnd(y);
-    const delta = y - touchStart;
-    // Limit drag a bit so it feels natural
-    setDragY(delta * 0.9);
-  };
+    setIsDragging(false);
 
-  const handleSwipe = () => {
-    const distance = touchStart - touchEnd;
-    if (Math.abs(distance) < 50) {
-      // not a swipe - reset
-      setDragY(0);
-      return;
-    }
+    const threshold = 80; // swipe distance to trigger snap
 
-    const isSwipeUp = distance > 0; // upward movement = next
-    const isSwipeDown = distance < 0; // downward = previous
-
-    if (isSwipeUp && currentProjectIndex < projects.length - 1) {
-      pendingDeltaRef.current = 1;
-      setSwipeDirection("up");
-      setIsTransitioning(true);
-      // animate out by moving dragY to -viewport
+    if (dragY < -threshold && currentProjectIndex < projects.length - 1) {
+      // Swipe up - go to next project
+      setIsSnapping(true);
       setDragY(-window.innerHeight);
-    } else if (isSwipeDown && currentProjectIndex > 0) {
-      pendingDeltaRef.current = -1;
-      setSwipeDirection("down");
-      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentProjectIndex((i) => i + 1);
+        setDragY(0);
+        setIsSnapping(false);
+      }, 300);
+    } else if (dragY > threshold && currentProjectIndex > 0) {
+      // Swipe down - go to previous project
+      setIsSnapping(true);
       setDragY(window.innerHeight);
+      setTimeout(() => {
+        setCurrentProjectIndex((i) => i - 1);
+        setDragY(0);
+        setIsSnapping(false);
+      }, 300);
     } else {
-      // out of bounds - snap back
+      // Not enough distance - snap back
       setDragY(0);
     }
   };
-
-  // commit index change after transition ends to avoid flicker
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const onTransitionEnd = (e: TransitionEvent) => {
-      if (e.propertyName !== "transform") return;
-      if (!isTransitioning) return;
-      const delta = pendingDeltaRef.current;
-      pendingDeltaRef.current = null;
-      if (delta && delta !== 0) {
-        setCurrentProjectIndex((i) => Math.max(0, Math.min(projects.length - 1, i + delta)));
-      }
-      // reset anim state immediately after index to prevent double animation
-      setIsTransitioning(false);
-      setSwipeDirection(null);
-      // Don't reset dragY here - let next render cycle handle it naturally
-    };
-
-    el.addEventListener("transitionend", onTransitionEnd as EventListener);
-    return () => el.removeEventListener("transitionend", onTransitionEnd as EventListener);
-  }, [isTransitioning]);
-
-  // Reset dragY after state updates to prevent animation
-  useEffect(() => {
-    if (!isTransitioning && dragY !== 0) {
-      setDragY(0);
-    }
-  }, [isTransitioning, dragY]);
 
   const getPreviewPosition = (index: number) => {
     // wissel tussen vaste posities per index (aanpasbaar)
@@ -135,89 +94,71 @@ const ProjectList = () => {
 
   // Mobile view
   if (isMobile) {
-    // determine potential neighbour while dragging
-    const nextIndexWhileDragging = dragY < 0 ? currentProjectIndex + 1 : dragY > 0 ? currentProjectIndex - 1 : null;
-
     return (
       <Link
         to={`/project/${currentProject?.slug}`}
         className="block w-full h-screen"
         onClick={(e) => {
-          // prevent accidental navigation when user was dragging
+          // prevent navigation if user was dragging
           if (Math.abs(dragY) > 10) e.preventDefault();
         }}
       >
         <div
           ref={containerRef}
-          className="relative w-full h-screen overflow-hidden bg-black cursor-grab active:cursor-grabbing"
+          className="relative w-full h-screen overflow-hidden bg-black"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Current image (drags with finger) - keep 10% side padding */}
+          {/* Current project - follows finger during drag */}
           <div
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0"
             style={{
-              transform: isTransitioning
-                ? swipeDirection === "up"
-                  ? "translateY(-100vh)"
-                  : "translateY(100vh)"
-                : `translateY(${dragY}px)`,
-              transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
+              transform: `translateY(${dragY}px)`,
+              transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
             }}
           >
-            <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white relative">
-              {currentImage && (
+            <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white">
+              {currentProject?.images[0] && (
                 <img
-                  key={`curr-${currentProjectIndex}-${currentImageIndex}`}
-                  src={currentImage.src}
-                  alt={currentImage.alt}
+                  src={currentProject.images[0].src}
+                  alt={currentProject.title}
                   className="max-w-full max-h-[80vh] object-contain"
                 />
               )}
             </div>
           </div>
 
-          {/* Neighbour image that stays attached like a roll */}
-          {((dragY < 0 && currentProjectIndex < projects.length - 1) || (dragY > 0 && currentProjectIndex > 0) || isTransitioning) && (
-            <div
-              className="absolute inset-0 flex items-center justify-center"
-              style={{
-                transform: isTransitioning
-                  ? "translateY(0)"
-                  : dragY < 0
-                  ? `translateY(calc(100vh + ${dragY}px))`
-                  : `translateY(calc(-100vh + ${dragY}px))`,
-                transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
-              }}
-            >
-              <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white relative">
+          {/* Next/Prev project preview - appears from bottom/top */}
+          <div
+            className="absolute inset-0"
+            style={{
+              transform: `translateY(calc(100vh + ${dragY}px))`,
+              transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
+            }}
+          >
+            <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white">
+              {dragY < 0 && currentProjectIndex < projects.length - 1 && projects[nextProjectIndex]?.images[0] && (
                 <img
-                  key={`next-${currentProjectIndex}`}
-                  src={
-                    // during transition use swipeDirection to pick next, otherwise use drag direction
-                    isTransitioning
-                      ? projects[
-                          swipeDirection === "up"
-                            ? Math.min(currentProjectIndex + 1, projects.length - 1)
-                            : Math.max(currentProjectIndex - 1, 0)
-                        ]?.images[0]?.src
-                      : projects[nextIndexWhileDragging ?? currentProjectIndex]?.images[0]?.src
-                  }
-                  alt="next"
+                  src={projects[nextProjectIndex].images[0].src}
+                  alt={projects[nextProjectIndex].title}
                   className="max-w-full max-h-[80vh] object-contain"
                 />
-              </div>
-            </div>
-          )}
-
-          {/* Title overlay */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-            <h1
-              className={cn(
-                "text-center text-black text-4xl sm:text-5xl font-bold tracking-tight px-6 transition-all duration-500",
-                isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
               )}
+              {dragY > 0 && currentProjectIndex > 0 && projects[prevProjectIndex]?.images[0] && (
+                <img
+                  src={projects[prevProjectIndex].images[0].src}
+                  alt={projects[prevProjectIndex].title}
+                  className="max-w-full max-h-[80vh] object-contain"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Title overlay - center */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <h1
+              className="text-center text-black text-4xl sm:text-5xl font-bold tracking-tight px-6"
               style={{
                 fontFamily: "'Montserrat', sans-serif",
                 lineHeight: "1.2",
@@ -234,7 +175,7 @@ const ProjectList = () => {
             </p>
           </div>
 
-          {/* Swipe hint (first project only) - bottom right */}
+          {/* Swipe hint - bottom right, first page only */}
           {currentProjectIndex === 0 && (
             <div className="absolute bottom-6 right-6 z-20">
               <div className="text-black/50 text-xs tracking-widest font-light animate-pulse pointer-events-none">
