@@ -32,7 +32,7 @@ export const projects: Project[] = [
     category: "Photography",
     thumbnail: new URL('../../images/Timbertunes.png', import.meta.url).href,
     images: [
-      { src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&q=80", alt: "Stadsgezicht" },
+      { src: new URL('../../images/Timbertunes.png', import.meta.url).href, alt: "Stadsgezicht" },
       { src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1200&q=80", alt: "Skyline" },
       { src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1200&q=80", alt: "Architectuur" },
     ],
@@ -46,7 +46,7 @@ export const projects: Project[] = [
     category: "Portrait",
     thumbnail: new URL('../../images/pbposter.png', import.meta.url).href,
     images: [
-      { src: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&q=80", alt: "Portret 1" },
+      { src: new URL('../../images/pbposter.png', import.meta.url).href, alt: "Portret 1" },
       { src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80", alt: "Portret 2" },
       { src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&q=80", alt: "Portret 3" },
     ],
@@ -60,7 +60,7 @@ export const projects: Project[] = [
     category: "Nature",
     thumbnail: new URL('../../images/Sloterdijk.png', import.meta.url).href,
     images: [
-      { src: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&q=80", alt: "Waterval" },
+      { src: new URL('../../images/Sloterdijk.png', import.meta.url).href, alt: "Waterval" },
       { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80", alt: "Bergen" },
       { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1200&q=80", alt: "Bos" },
     ],
@@ -72,9 +72,9 @@ export const projects: Project[] = [
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
     year: "2023",
     category: "Abstract",
-    thumbnail: new URL('../../images/GraduationTUD.png', import.meta.url).href,
+    thumbnail: new URL('../../images/graduation.png', import.meta.url).href,
     images: [
-      { src: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1200&q=80", alt: "Abstract 1" },
+      { src: new URL('../../images/graduation.png', import.meta.url).href, alt: "Abstract 1" },
       { src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200&q=80", alt: "Abstract 2" },
       { src: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=1200&q=80", alt: "Abstract 3" },
     ],
