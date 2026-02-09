@@ -104,15 +104,22 @@ const ProjectList = () => {
       if (delta && delta !== 0) {
         setCurrentProjectIndex((i) => Math.max(0, Math.min(projects.length - 1, i + delta)));
       }
-      // reset anim state
+      // reset anim state immediately after index to prevent double animation
       setIsTransitioning(false);
       setSwipeDirection(null);
-      setDragY(0);
+      // Don't reset dragY here - let next render cycle handle it naturally
     };
 
     el.addEventListener("transitionend", onTransitionEnd as EventListener);
     return () => el.removeEventListener("transitionend", onTransitionEnd as EventListener);
   }, [isTransitioning]);
+
+  // Reset dragY after state updates to prevent animation
+  useEffect(() => {
+    if (!isTransitioning && dragY !== 0) {
+      setDragY(0);
+    }
+  }, [isTransitioning, dragY]);
 
   const getPreviewPosition = (index: number) => {
     // wissel tussen vaste posities per index (aanpasbaar)
@@ -227,31 +234,14 @@ const ProjectList = () => {
             </p>
           </div>
 
-          {/* Swipe hint (first project only) */}
+          {/* Swipe hint (first project only) - bottom right */}
           {currentProjectIndex === 0 && (
-            <div className="absolute top-1/2 right-6 z-20 transform -translate-y-1/2">
+            <div className="absolute bottom-6 right-6 z-20">
               <div className="text-black/50 text-xs tracking-widest font-light animate-pulse pointer-events-none">
                 swipe ↑
               </div>
             </div>
           )}
-
-          {/* Navigation indicators */}
-          <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none">
-            <div className={cn("text-xs text-black/40 transition-opacity", currentProjectIndex === 0 ? "opacity-40" : "opacity-100")}>
-              ↑ prev
-            </div>
-            <div className={cn("text-xs text-black/40 transition-opacity", currentProjectIndex === projects.length - 1 ? "opacity-40" : "opacity-100")}>
-              next ↓
-            </div>
-          </div>
-
-          {/* Tap to navigate hint */}
-          <div className="absolute bottom-20 left-0 right-0 z-20 text-center pointer-events-none">
-            <p className="text-black/40 text-xs tracking-widest font-light">
-              tap to view
-            </p>
-          </div>
         </div>
       </Link>
     );
