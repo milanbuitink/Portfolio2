@@ -14,6 +14,7 @@ const ProjectList = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<"up" | "down" | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const currentProject = projects[currentProjectIndex];
@@ -21,11 +22,11 @@ const ProjectList = () => {
 
   // Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart(e.targetTouches[0].clientY);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    setTouchEnd(e.changedTouches[0].clientX);
+    setTouchEnd(e.changedTouches[0].clientY);
     handleSwipe();
   };
 
@@ -33,19 +34,20 @@ const ProjectList = () => {
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50; // swipe left
-    const isRightSwipe = distance < -50; // swipe right
+    const isSwipeUp = distance > 50; // swipe up (naar boven = volgende project)
+    const isSwipeDown = distance < -50; // swipe down (naar beneden = vorig project)
 
-    if (isLeftSwipe || isRightSwipe) {
+    if (isSwipeUp || isSwipeDown) {
       setIsTransitioning(true);
+      setSwipeDirection(isSwipeUp ? "up" : "down");
       
-      if (isLeftSwipe) {
+      if (isSwipeUp) {
         // Next project
         if (currentProjectIndex < projects.length - 1) {
           setCurrentProjectIndex(currentProjectIndex + 1);
           setCurrentImageIndex(0);
         }
-      } else if (isRightSwipe) {
+      } else if (isSwipeDown) {
         // Previous project
         if (currentProjectIndex > 0) {
           setCurrentProjectIndex(currentProjectIndex - 1);
@@ -53,7 +55,10 @@ const ProjectList = () => {
         }
       }
 
-      setTimeout(() => setIsTransitioning(false), 300);
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setSwipeDirection(null);
+      }, 300);
     }
   };
 
@@ -72,73 +77,127 @@ const ProjectList = () => {
   // Mobile view
   if (isMobile) {
     return (
-      <div
-        ref={containerRef}
-        className="relative w-full h-screen overflow-hidden bg-black cursor-grab active:cursor-grabbing"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+      <Link
+        to={`/project/${currentProject?.slug}`}
+        className="block w-full h-screen"
       >
-        {/* Image container */}
         <div
-          className="absolute inset-0 flex items-center justify-center"
+          ref={containerRef}
+          className="relative w-full h-screen overflow-hidden bg-black cursor-grab active:cursor-grabbing"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
-          {currentImage && (
-            <img
-              key={`${currentProjectIndex}-${currentImageIndex}`}
-              src={currentImage.src}
-              alt={currentImage.alt}
-              className={cn(
-                "w-full h-full object-cover transition-opacity duration-500",
-                isTransitioning ? "opacity-0" : "opacity-100"
-              )}
-            />
-          )}
-          {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
-        </div>
-
-        {/* Title overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-          <h1
+          {/* Image container - with vertical animation */}
+          <div
             className={cn(
-              "text-center text-white text-4xl sm:text-5xl font-bold tracking-tight px-6 drop-shadow-2xl transition-all duration-500",
-              isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
+              "absolute inset-0 flex items-center justify-center transition-all duration-500"
             )}
             style={{
-              fontFamily: "'Montserrat', sans-serif",
-              lineHeight: "1.2",
+              opacity: isTransitioning ? 0 : 1,
+              transform: isTransitioning 
+                ? swipeDirection === "up" 
+                  ? "translateY(-100vh)" 
+                  : "translateY(100vh)"
+                : "translateY(0)",
             }}
           >
-            {currentProject?.title}
-          </h1>
-        </div>
+            {currentImage && (
+              <img
+                key={`${currentProjectIndex}-${currentImageIndex}`}
+                src={currentImage.src}
+                alt={currentImage.alt}
+                className="w-full h-full object-cover"
+              />
+            )}
+            {/* Dark overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
+          </div>
 
-        {/* Project counter */}
-        <div className="absolute bottom-8 left-0 right-0 z-20 text-center">
-          <p className="text-white text-sm font-light tracking-widest">
-            {currentProjectIndex + 1} / {projects.length}
-          </p>
-        </div>
+          {/* Next project image preview - slides in from top/bottom */}
+          {isTransitioning && (
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                transform: swipeDirection === "up" 
+                  ? "translateY(100vh)" 
+                  : "translateY(-100vh)",
+                transition: "transform 500ms ease-out",
+                opacity: 1,
+              }}
+            >
+              {projects[
+                swipeDirection === "up"
+                  ? Math.min(currentProjectIndex, projects.length - 1)
+                  : Math.max(currentProjectIndex, 0)
+              ]?.images[0] && (
+                <>
+                  <img
+                    src={
+                      projects[
+                        swipeDirection === "up"
+                          ? Math.min(currentProjectIndex, projects.length - 1)
+                          : Math.max(currentProjectIndex, 0)
+                      ]?.images[0]?.src
+                    }
+                    alt="Next project"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
+                </>
+              )}
+            </div>
+          )}
 
-        {/* Swipe hint (first project only) */}
-        {currentProjectIndex === 0 && (
-          <div className="absolute top-1/2 right-6 z-20 transform -translate-y-1/2">
-            <div className="text-white/50 text-xs tracking-widest font-light animate-pulse">
-              swipe ←
+          {/* Title overlay */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+            <h1
+              className={cn(
+                "text-center text-white text-4xl sm:text-5xl font-bold tracking-tight px-6 drop-shadow-2xl transition-all duration-500",
+                isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
+              )}
+              style={{
+                fontFamily: "'Montserrat', sans-serif",
+                lineHeight: "1.2",
+              }}
+            >
+              {currentProject?.title}
+            </h1>
+          </div>
+
+          {/* Project counter */}
+          <div className="absolute bottom-8 left-0 right-0 z-20 text-center">
+            <p className="text-white text-sm font-light tracking-widest">
+              {currentProjectIndex + 1} / {projects.length}
+            </p>
+          </div>
+
+          {/* Swipe hint (first project only) */}
+          {currentProjectIndex === 0 && (
+            <div className="absolute top-1/2 right-6 z-20 transform -translate-y-1/2">
+              <div className="text-white/50 text-xs tracking-widest font-light animate-pulse pointer-events-none">
+                swipe ↑
+              </div>
+            </div>
+          )}
+
+          {/* Navigation indicators */}
+          <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none">
+            <div className={cn("text-xs text-white/40 transition-opacity", currentProjectIndex === 0 ? "opacity-40" : "opacity-100")}>
+              ↑ prev
+            </div>
+            <div className={cn("text-xs text-white/40 transition-opacity", currentProjectIndex === projects.length - 1 ? "opacity-40" : "opacity-100")}>
+              next ↓
             </div>
           </div>
-        )}
 
-        {/* Navigation indicators */}
-        <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none">
-          <div className={cn("text-xs text-white/40 transition-opacity", currentProjectIndex === 0 ? "opacity-40" : "opacity-100")}>
-            ← prev
-          </div>
-          <div className={cn("text-xs text-white/40 transition-opacity", currentProjectIndex === projects.length - 1 ? "opacity-40" : "opacity-100")}>
-            next →
+          {/* Tap to navigate hint */}
+          <div className="absolute bottom-20 left-0 right-0 z-20 text-center pointer-events-none">
+            <p className="text-white/40 text-xs tracking-widest font-light">
+              tap to view
+            </p>
           </div>
         </div>
-      </div>
+      </Link>
     );
   }
 
