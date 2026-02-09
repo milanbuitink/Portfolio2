@@ -132,7 +132,7 @@ const ProjectList = () => {
             </div>
 
             {/* Title label below image */}
-            <div className="py-8 text-center">
+            <div className="py-4 text-center -mt-16">
               <h3
                 className="text-2xl font-bold tracking-tight text-black"
                 style={{
@@ -173,7 +173,7 @@ const ProjectList = () => {
             </div>
 
             {/* Title label below image */}
-            <div className="py-8 text-center">
+            <div className="py-4 text-center -mt-16">
               <h3
                 className="text-2xl font-bold tracking-tight text-black"
                 style={{
