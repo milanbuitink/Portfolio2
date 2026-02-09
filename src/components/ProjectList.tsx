@@ -18,6 +18,7 @@ const ProjectList = () => {
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const pendingDeltaRef = useRef<number | null>(null);
 
   // Prevent page scroll when dragging on mobile by using a non-passive listener
   useEffect(() => {
@@ -59,7 +60,7 @@ const ProjectList = () => {
     setTouchEnd(y);
     const delta = y - touchStart;
     // Limit drag a bit so it feels natural
-    setDragY(delta);
+    setDragY(delta * 0.9);
   };
 
   const handleSwipe = () => {
@@ -74,29 +75,44 @@ const ProjectList = () => {
     const isSwipeDown = distance < 0; // downward = previous
 
     if (isSwipeUp && currentProjectIndex < projects.length - 1) {
-      setIsTransitioning(true);
+      pendingDeltaRef.current = 1;
       setSwipeDirection("up");
-      // animate then commit
-      setTimeout(() => {
-        setCurrentProjectIndex((i) => i + 1);
-        setIsTransitioning(false);
-        setSwipeDirection(null);
-        setDragY(0);
-      }, 220);
-    } else if (isSwipeDown && currentProjectIndex > 0) {
       setIsTransitioning(true);
+      // animate out by moving dragY to -viewport
+      setDragY(-window.innerHeight);
+    } else if (isSwipeDown && currentProjectIndex > 0) {
+      pendingDeltaRef.current = -1;
       setSwipeDirection("down");
-      setTimeout(() => {
-        setCurrentProjectIndex((i) => i - 1);
-        setIsTransitioning(false);
-        setSwipeDirection(null);
-        setDragY(0);
-      }, 220);
+      setIsTransitioning(true);
+      setDragY(window.innerHeight);
     } else {
       // out of bounds - snap back
       setDragY(0);
     }
   };
+
+  // commit index change after transition ends to avoid flicker
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onTransitionEnd = (e: TransitionEvent) => {
+      if (e.propertyName !== "transform") return;
+      if (!isTransitioning) return;
+      const delta = pendingDeltaRef.current;
+      pendingDeltaRef.current = null;
+      if (delta && delta !== 0) {
+        setCurrentProjectIndex((i) => Math.max(0, Math.min(projects.length - 1, i + delta)));
+      }
+      // reset anim state
+      setIsTransitioning(false);
+      setSwipeDirection(null);
+      setDragY(0);
+    };
+
+    el.addEventListener("transitionend", onTransitionEnd as EventListener);
+    return () => el.removeEventListener("transitionend", onTransitionEnd as EventListener);
+  }, [isTransitioning]);
 
   const getPreviewPosition = (index: number) => {
     // wissel tussen vaste posities per index (aanpasbaar)
@@ -143,18 +159,16 @@ const ProjectList = () => {
               transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
             }}
           >
-            <div className="w-full h-full px-[10vw] flex items-center justify-center">
+            <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white relative">
               {currentImage && (
                 <img
                   key={`curr-${currentProjectIndex}-${currentImageIndex}`}
                   src={currentImage.src}
                   alt={currentImage.alt}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  className="max-w-full"
+                  className="max-w-full max-h-[80vh] object-contain"
                 />
               )}
             </div>
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
           </div>
 
           {/* Neighbour image that stays attached like a roll */}
@@ -170,7 +184,7 @@ const ProjectList = () => {
                 transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
               }}
             >
-              <div className="w-full h-full px-[10vw] flex items-center justify-center">
+              <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white relative">
                 <img
                   key={`next-${currentProjectIndex}`}
                   src={
@@ -184,11 +198,9 @@ const ProjectList = () => {
                       : projects[nextIndexWhileDragging ?? currentProjectIndex]?.images[0]?.src
                   }
                   alt="next"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  className="max-w-full"
+                  className="max-w-full max-h-[80vh] object-contain"
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
             </div>
           )}
 
@@ -196,7 +208,7 @@ const ProjectList = () => {
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
             <h1
               className={cn(
-                "text-center text-white text-4xl sm:text-5xl font-bold tracking-tight px-6 drop-shadow-2xl transition-all duration-500",
+                "text-center text-black text-4xl sm:text-5xl font-bold tracking-tight px-6 transition-all duration-500",
                 isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
               )}
               style={{
@@ -218,7 +230,7 @@ const ProjectList = () => {
           {/* Swipe hint (first project only) */}
           {currentProjectIndex === 0 && (
             <div className="absolute top-1/2 right-6 z-20 transform -translate-y-1/2">
-              <div className="text-white/50 text-xs tracking-widest font-light animate-pulse pointer-events-none">
+              <div className="text-black/50 text-xs tracking-widest font-light animate-pulse pointer-events-none">
                 swipe ↑
               </div>
             </div>
@@ -226,17 +238,17 @@ const ProjectList = () => {
 
           {/* Navigation indicators */}
           <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none">
-            <div className={cn("text-xs text-white/40 transition-opacity", currentProjectIndex === 0 ? "opacity-40" : "opacity-100")}>
+            <div className={cn("text-xs text-black/40 transition-opacity", currentProjectIndex === 0 ? "opacity-40" : "opacity-100")}>
               ↑ prev
             </div>
-            <div className={cn("text-xs text-white/40 transition-opacity", currentProjectIndex === projects.length - 1 ? "opacity-40" : "opacity-100")}>
+            <div className={cn("text-xs text-black/40 transition-opacity", currentProjectIndex === projects.length - 1 ? "opacity-40" : "opacity-100")}>
               next ↓
             </div>
           </div>
 
           {/* Tap to navigate hint */}
           <div className="absolute bottom-20 left-0 right-0 z-20 text-center pointer-events-none">
-            <p className="text-white/40 text-xs tracking-widest font-light">
+            <p className="text-black/40 text-xs tracking-widest font-light">
               tap to view
             </p>
           </div>
