@@ -21,7 +21,7 @@ export const siteConfig = {
   // ===========================================
   about: {
     // Je portretfoto URL
-    portrait: "images/milan-portret.png",
+    portrait: new URL('../../images/milan-portret.png', import.meta.url).href,
     
     // Je titel/rol
     title: "Architect & Ingenieur",

@@ -72,7 +72,7 @@ export const projects: Project[] = [
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
     year: "2023",
     category: "Abstract",
-    thumbnail: new URL('../../images/milan-portret.png', import.meta.url).href,
+    thumbnail: new URL('../../images/GraduationTUD.png', import.meta.url).href,
     images: [
       { src: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1200&q=80", alt: "Abstract 1" },
       { src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200&q=80", alt: "Abstract 2" },
