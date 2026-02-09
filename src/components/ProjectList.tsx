@@ -143,33 +143,16 @@ const ProjectList = () => {
               </div>
             </div>
 
-            {/* Title label below image */}
-            <div className="py-8 text-center">
+            {/* Title label below image - moved up 20% */}
+            <div className="py-4 text-center -mt-12">
               <h3
                 className="text-2xl font-bold tracking-tight text-black"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
                 }}
               >
-                TITLE
+                {currentProject?.title}
               </h3>
-            </div>
-
-            {/* Bottom info */}
-            <div className="pb-20 w-full px-6 flex justify-between items-end">
-              <div>
-                <p
-                  className="text-xs font-bold tracking-widest text-black"
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                  }}
-                >
-                  ARCHIVE
-                </p>
-              </div>
-              <div className="text-center text-xs text-gray-400 font-light">
-                {currentProjectIndex + 1} / {projects.length}
-              </div>
             </div>
           </div>
 
@@ -217,33 +200,20 @@ const ProjectList = () => {
               </div>
             </div>
 
-            {/* Title label below image */}
-            <div className="py-8 text-center">
+            {/* Title label below image - moved up 20% */}
+            <div className="py-4 text-center -mt-12">
               <h3
                 className="text-2xl font-bold tracking-tight text-black"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
                 }}
               >
-                TITLE
+                {dragY < 0 && currentProjectIndex < projects.length - 1
+                  ? projects[nextProjectIndex]?.title
+                  : dragY > 0 && currentProjectIndex > 0
+                  ? projects[prevProjectIndex]?.title
+                  : ""}
               </h3>
-            </div>
-
-            {/* Bottom info */}
-            <div className="pb-20 w-full px-6 flex justify-between items-end">
-              <div>
-                <p
-                  className="text-xs font-bold tracking-widest text-black"
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                  }}
-                >
-                  ARCHIVE
-                </p>
-              </div>
-              <div className="text-center text-xs text-gray-400 font-light">
-                {dragY < 0 ? currentProjectIndex + 2 : currentProjectIndex} / {projects.length}
-              </div>
             </div>
           </div>
 
