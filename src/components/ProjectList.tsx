@@ -19,6 +19,21 @@ const ProjectList = () => {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Prevent page scroll when dragging on mobile by using a non-passive listener
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onMove = (e: TouchEvent) => {
+      if (isDragging) {
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener("touchmove", onMove as EventListener, { passive: false });
+    return () => el.removeEventListener("touchmove", onMove as EventListener);
+  }, [isDragging]);
+
   const currentProject = projects[currentProjectIndex];
   const currentImage = currentProject?.images[currentImageIndex];
 
@@ -116,7 +131,7 @@ const ProjectList = () => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Current image (drags with finger) */}
+          {/* Current image (drags with finger) - keep 10% side padding */}
           <div
             className="absolute inset-0 flex items-center justify-center"
             style={{
@@ -128,14 +143,17 @@ const ProjectList = () => {
               transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
             }}
           >
-            {currentImage && (
-              <img
-                key={`curr-${currentProjectIndex}-${currentImageIndex}`}
-                src={currentImage.src}
-                alt={currentImage.alt}
-                className="max-w-[92%] mx-auto h-full object-cover"
-              />
-            )}
+            <div className="w-full h-full px-[10vw] flex items-center justify-center">
+              {currentImage && (
+                <img
+                  key={`curr-${currentProjectIndex}-${currentImageIndex}`}
+                  src={currentImage.src}
+                  alt={currentImage.alt}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  className="max-w-full"
+                />
+              )}
+            </div>
             <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
           </div>
 
@@ -152,21 +170,24 @@ const ProjectList = () => {
                 transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
               }}
             >
-              <img
-                key={`next-${currentProjectIndex}`}
-                src={
-                  // during transition use swipeDirection to pick next, otherwise use drag direction
-                  isTransitioning
-                    ? projects[
-                        swipeDirection === "up"
-                          ? Math.min(currentProjectIndex + 1, projects.length - 1)
-                          : Math.max(currentProjectIndex - 1, 0)
-                      ]?.images[0]?.src
-                    : projects[nextIndexWhileDragging ?? currentProjectIndex]?.images[0]?.src
-                }
-                alt="next"
-                className="max-w-[92%] mx-auto h-full object-cover"
-              />
+              <div className="w-full h-full px-[10vw] flex items-center justify-center">
+                <img
+                  key={`next-${currentProjectIndex}`}
+                  src={
+                    // during transition use swipeDirection to pick next, otherwise use drag direction
+                    isTransitioning
+                      ? projects[
+                          swipeDirection === "up"
+                            ? Math.min(currentProjectIndex + 1, projects.length - 1)
+                            : Math.max(currentProjectIndex - 1, 0)
+                        ]?.images[0]?.src
+                      : projects[nextIndexWhileDragging ?? currentProjectIndex]?.images[0]?.src
+                  }
+                  alt="next"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  className="max-w-full"
+                />
+              </div>
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
             </div>
           )}
