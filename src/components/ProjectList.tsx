@@ -105,80 +105,152 @@ const ProjectList = () => {
       >
         <div
           ref={containerRef}
-          className="relative w-full h-screen overflow-hidden bg-black"
+          className="relative w-full h-screen overflow-hidden bg-white flex flex-col"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           {/* Current project - follows finger during drag */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 flex flex-col items-center justify-center"
             style={{
               transform: `translateY(${dragY}px)`,
               transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
             }}
           >
-            <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white">
-              {currentProject?.images[0] && (
-                <img
-                  src={currentProject.images[0].src}
-                  alt={currentProject.title}
-                  className="max-w-full max-h-[80vh] object-contain"
-                />
-              )}
+            {/* Title at top */}
+            <div className="pt-12 px-6 text-center">
+              <h2
+                className="text-lg font-bold tracking-tight text-black"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                }}
+              >
+                {currentProject?.title}
+              </h2>
+            </div>
+
+            {/* Image box - centered */}
+            <div className="flex-1 flex items-center justify-center px-8 w-full">
+              <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
+                {currentProject?.images[0] && (
+                  <img
+                    src={currentProject.images[0].src}
+                    alt={currentProject.title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Title label below image */}
+            <div className="py-8 text-center">
+              <h3
+                className="text-2xl font-bold tracking-tight text-black"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                }}
+              >
+                TITLE
+              </h3>
+            </div>
+
+            {/* Bottom info */}
+            <div className="pb-20 w-full px-6 flex justify-between items-end">
+              <div>
+                <p
+                  className="text-xs font-bold tracking-widest text-black"
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                  }}
+                >
+                  ARCHIVE
+                </p>
+              </div>
+              <div className="text-center text-xs text-gray-400 font-light">
+                {currentProjectIndex + 1} / {projects.length}
+              </div>
             </div>
           </div>
 
           {/* Next/Prev project preview - appears from bottom/top */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 flex flex-col items-center justify-center"
             style={{
               transform: `translateY(calc(100vh + ${dragY}px))`,
               transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
             }}
           >
-            <div className="w-full h-full px-[10vw] flex items-center justify-center bg-white">
-              {dragY < 0 && currentProjectIndex < projects.length - 1 && projects[nextProjectIndex]?.images[0] && (
-                <img
-                  src={projects[nextProjectIndex].images[0].src}
-                  alt={projects[nextProjectIndex].title}
-                  className="max-w-full max-h-[80vh] object-contain"
-                />
-              )}
-              {dragY > 0 && currentProjectIndex > 0 && projects[prevProjectIndex]?.images[0] && (
-                <img
-                  src={projects[prevProjectIndex].images[0].src}
-                  alt={projects[prevProjectIndex].title}
-                  className="max-w-full max-h-[80vh] object-contain"
-                />
-              )}
+            {/* Title at top */}
+            <div className="pt-12 px-6 text-center">
+              <h2
+                className="text-lg font-bold tracking-tight text-black"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                }}
+              >
+                {dragY < 0 && currentProjectIndex < projects.length - 1
+                  ? projects[nextProjectIndex]?.title
+                  : dragY > 0 && currentProjectIndex > 0
+                  ? projects[prevProjectIndex]?.title
+                  : ""}
+              </h2>
             </div>
-          </div>
 
-          {/* Title overlay - center */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <h1
-              className="text-center text-black text-4xl sm:text-5xl font-bold tracking-tight px-6"
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                lineHeight: "1.2",
-              }}
-            >
-              {currentProject?.title}
-            </h1>
-          </div>
+            {/* Image box - centered */}
+            <div className="flex-1 flex items-center justify-center px-8 w-full">
+              <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
+                {dragY < 0 && currentProjectIndex < projects.length - 1 && projects[nextProjectIndex]?.images[0] && (
+                  <img
+                    src={projects[nextProjectIndex].images[0].src}
+                    alt={projects[nextProjectIndex].title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {dragY > 0 && currentProjectIndex > 0 && projects[prevProjectIndex]?.images[0] && (
+                  <img
+                    src={projects[prevProjectIndex].images[0].src}
+                    alt={projects[prevProjectIndex].title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            </div>
 
-          {/* Project counter */}
-          <div className="absolute bottom-8 left-0 right-0 z-20 text-center">
-            <p className="text-white text-sm font-light tracking-widest">
-              {currentProjectIndex + 1} / {projects.length}
-            </p>
+            {/* Title label below image */}
+            <div className="py-8 text-center">
+              <h3
+                className="text-2xl font-bold tracking-tight text-black"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                }}
+              >
+                TITLE
+              </h3>
+            </div>
+
+            {/* Bottom info */}
+            <div className="pb-20 w-full px-6 flex justify-between items-end">
+              <div>
+                <p
+                  className="text-xs font-bold tracking-widest text-black"
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                  }}
+                >
+                  ARCHIVE
+                </p>
+              </div>
+              <div className="text-center text-xs text-gray-400 font-light">
+                {dragY < 0 ? currentProjectIndex + 2 : currentProjectIndex} / {projects.length}
+              </div>
+            </div>
           </div>
 
           {/* Swipe hint - bottom right, first page only */}
           {currentProjectIndex === 0 && (
-            <div className="absolute bottom-6 right-6 z-20">
-              <div className="text-black/50 text-xs tracking-widest font-light animate-pulse pointer-events-none">
+            <div className="absolute bottom-20 right-6 z-20">
+              <div className="text-black/50 text-xs tracking-widest font-light pointer-events-none">
                 swipe ↑
               </div>
             </div>
