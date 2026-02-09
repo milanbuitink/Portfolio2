@@ -15,6 +15,8 @@ const ProjectList = () => {
   const [touchEnd, setTouchEnd] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<"up" | "down" | null>(null);
+  const [dragY, setDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const currentProject = projects[currentProjectIndex];
@@ -22,43 +24,62 @@ const ProjectList = () => {
 
   // Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientY);
+    const y = e.targetTouches[0].clientY;
+    setTouchStart(y);
+    setTouchEnd(y);
+    setIsDragging(true);
+    setDragY(0);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    setTouchEnd(e.changedTouches[0].clientY);
+    const y = e.changedTouches[0].clientY;
+    setTouchEnd(y);
+    setIsDragging(false);
     handleSwipe();
   };
 
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const y = e.touches[0].clientY;
+    setTouchEnd(y);
+    const delta = y - touchStart;
+    // Limit drag a bit so it feels natural
+    setDragY(delta);
+  };
+
   const handleSwipe = () => {
-    if (!touchStart || !touchEnd) return;
-    
     const distance = touchStart - touchEnd;
-    const isSwipeUp = distance > 50; // swipe up (naar boven = volgende project)
-    const isSwipeDown = distance < -50; // swipe down (naar beneden = vorig project)
+    if (Math.abs(distance) < 50) {
+      // not a swipe - reset
+      setDragY(0);
+      return;
+    }
 
-    if (isSwipeUp || isSwipeDown) {
+    const isSwipeUp = distance > 0; // upward movement = next
+    const isSwipeDown = distance < 0; // downward = previous
+
+    if (isSwipeUp && currentProjectIndex < projects.length - 1) {
       setIsTransitioning(true);
-      setSwipeDirection(isSwipeUp ? "up" : "down");
-      
-      if (isSwipeUp) {
-        // Next project
-        if (currentProjectIndex < projects.length - 1) {
-          setCurrentProjectIndex(currentProjectIndex + 1);
-          setCurrentImageIndex(0);
-        }
-      } else if (isSwipeDown) {
-        // Previous project
-        if (currentProjectIndex > 0) {
-          setCurrentProjectIndex(currentProjectIndex - 1);
-          setCurrentImageIndex(0);
-        }
-      }
-
+      setSwipeDirection("up");
+      // animate then commit
       setTimeout(() => {
+        setCurrentProjectIndex((i) => i + 1);
         setIsTransitioning(false);
         setSwipeDirection(null);
-      }, 300);
+        setDragY(0);
+      }, 220);
+    } else if (isSwipeDown && currentProjectIndex > 0) {
+      setIsTransitioning(true);
+      setSwipeDirection("down");
+      setTimeout(() => {
+        setCurrentProjectIndex((i) => i - 1);
+        setIsTransitioning(false);
+        setSwipeDirection(null);
+        setDragY(0);
+      }, 220);
+    } else {
+      // out of bounds - snap back
+      setDragY(0);
     }
   };
 
@@ -76,75 +97,77 @@ const ProjectList = () => {
 
   // Mobile view
   if (isMobile) {
+    // determine potential neighbour while dragging
+    const nextIndexWhileDragging = dragY < 0 ? currentProjectIndex + 1 : dragY > 0 ? currentProjectIndex - 1 : null;
+
     return (
       <Link
         to={`/project/${currentProject?.slug}`}
         className="block w-full h-screen"
+        onClick={(e) => {
+          // prevent accidental navigation when user was dragging
+          if (Math.abs(dragY) > 10) e.preventDefault();
+        }}
       >
         <div
           ref={containerRef}
           className="relative w-full h-screen overflow-hidden bg-black cursor-grab active:cursor-grabbing"
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Image container - with vertical animation */}
+          {/* Current image (drags with finger) */}
           <div
-            className={cn(
-              "absolute inset-0 flex items-center justify-center transition-all duration-500"
-            )}
+            className="absolute inset-0 flex items-center justify-center"
             style={{
-              opacity: isTransitioning ? 0 : 1,
-              transform: isTransitioning 
-                ? swipeDirection === "up" 
-                  ? "translateY(-100vh)" 
+              transform: isTransitioning
+                ? swipeDirection === "up"
+                  ? "translateY(-100vh)"
                   : "translateY(100vh)"
-                : "translateY(0)",
+                : `translateY(${dragY}px)`,
+              transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
             }}
           >
             {currentImage && (
               <img
-                key={`${currentProjectIndex}-${currentImageIndex}`}
+                key={`curr-${currentProjectIndex}-${currentImageIndex}`}
                 src={currentImage.src}
                 alt={currentImage.alt}
-                className="w-full h-full object-cover"
+                className="max-w-[92%] mx-auto h-full object-cover"
               />
             )}
-            {/* Dark overlay for text readability */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
           </div>
 
-          {/* Next project image preview - slides in from top/bottom */}
-          {isTransitioning && (
+          {/* Neighbour image that stays attached like a roll */}
+          {((dragY < 0 && currentProjectIndex < projects.length - 1) || (dragY > 0 && currentProjectIndex > 0) || isTransitioning) && (
             <div
               className="absolute inset-0 flex items-center justify-center"
               style={{
-                transform: swipeDirection === "up" 
-                  ? "translateY(100vh)" 
-                  : "translateY(-100vh)",
-                transition: "transform 500ms ease-out",
-                opacity: 1,
+                transform: isTransitioning
+                  ? "translateY(0)"
+                  : dragY < 0
+                  ? `translateY(calc(100vh + ${dragY}px))`
+                  : `translateY(calc(-100vh + ${dragY}px))`,
+                transition: isDragging ? "none" : "transform 220ms cubic-bezier(.22,.9,.3,1)",
               }}
             >
-              {projects[
-                swipeDirection === "up"
-                  ? Math.min(currentProjectIndex, projects.length - 1)
-                  : Math.max(currentProjectIndex, 0)
-              ]?.images[0] && (
-                <>
-                  <img
-                    src={
-                      projects[
+              <img
+                key={`next-${currentProjectIndex}`}
+                src={
+                  // during transition use swipeDirection to pick next, otherwise use drag direction
+                  isTransitioning
+                    ? projects[
                         swipeDirection === "up"
-                          ? Math.min(currentProjectIndex, projects.length - 1)
-                          : Math.max(currentProjectIndex, 0)
+                          ? Math.min(currentProjectIndex + 1, projects.length - 1)
+                          : Math.max(currentProjectIndex - 1, 0)
                       ]?.images[0]?.src
-                    }
-                    alt="Next project"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
-                </>
-              )}
+                    : projects[nextIndexWhileDragging ?? currentProjectIndex]?.images[0]?.src
+                }
+                alt="next"
+                className="max-w-[92%] mx-auto h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
             </div>
           )}
 
