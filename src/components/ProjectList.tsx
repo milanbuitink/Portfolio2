@@ -118,18 +118,6 @@ const ProjectList = () => {
               transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
             }}
           >
-            {/* Title at top */}
-            <div className="pt-12 px-6 text-center">
-              <h2
-                className="text-lg font-bold tracking-tight text-black"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                }}
-              >
-                {currentProject?.title}
-              </h2>
-            </div>
-
             {/* Image box - centered */}
             <div className="flex-1 flex items-center justify-center px-8 w-full">
               <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
@@ -143,8 +131,8 @@ const ProjectList = () => {
               </div>
             </div>
 
-            {/* Title label below image - moved up 20% */}
-            <div className="py-4 text-center -mt-12">
+            {/* Title label below image */}
+            <div className="py-8 text-center">
               <h3
                 className="text-2xl font-bold tracking-tight text-black"
                 style={{
@@ -164,22 +152,6 @@ const ProjectList = () => {
               transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
             }}
           >
-            {/* Title at top */}
-            <div className="pt-12 px-6 text-center">
-              <h2
-                className="text-lg font-bold tracking-tight text-black"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                }}
-              >
-                {dragY < 0 && currentProjectIndex < projects.length - 1
-                  ? projects[nextProjectIndex]?.title
-                  : dragY > 0 && currentProjectIndex > 0
-                  ? projects[prevProjectIndex]?.title
-                  : ""}
-              </h2>
-            </div>
-
             {/* Image box - centered */}
             <div className="flex-1 flex items-center justify-center px-8 w-full">
               <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
@@ -200,8 +172,8 @@ const ProjectList = () => {
               </div>
             </div>
 
-            {/* Title label below image - moved up 20% */}
-            <div className="py-4 text-center -mt-12">
+            {/* Title label below image */}
+            <div className="py-8 text-center">
               <h3
                 className="text-2xl font-bold tracking-tight text-black"
                 style={{
