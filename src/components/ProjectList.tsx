@@ -110,16 +110,26 @@ const ProjectList = () => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
+          {/* White fade overlay */}
+          <div
+            className="absolute inset-0 bg-white pointer-events-none z-10"
+            style={{
+              opacity: isSnapping ? 1 : 0,
+              transition: isSnapping ? "opacity 1000ms ease-out 0ms, opacity 1000ms ease-in 1000ms" : "none",
+            }}
+          />
+
           {/* Current project - follows finger during drag */}
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center"
+            className="absolute inset-0"
             style={{
-              transform: `translateY(${dragY}px)`,
-              transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
+              transform: "translateY(0px)",
+              opacity: isSnapping ? 0 : 1,
+              transition: "opacity 1000ms ease-in-out",
             }}
           >
-            {/* Image box - centered */}
-            <div className="flex-1 flex items-center justify-center px-8 w-full">
+            {/* Image box - bottom at 50% of screen */}
+            <div className="absolute bottom-[39%] left-0 right-0 flex justify-center px-4 w-full">
               <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
                 {currentProject?.images[0] && (
                   <img
@@ -131,10 +141,10 @@ const ProjectList = () => {
               </div>
             </div>
 
-            {/* Title label below image */}
-            <div className="py-2 text-center -mt-24">
+            {/* Title label - positioned 20% below image (70% down screen) */}
+            <div className="absolute top-[71%] left-0 right-0 flex justify-center w-full -translate-y-1/2">
               <h3
-                className="text-2xl font-bold tracking-tight text-black"
+                className="text-2xl font-bold tracking-tight text-black text-center"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
                 }}
@@ -146,14 +156,15 @@ const ProjectList = () => {
 
           {/* Next/Prev project preview - appears from bottom/top */}
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center"
+            className="absolute inset-0"
             style={{
-              transform: `translateY(calc(100vh + ${dragY}px))`,
-              transition: isSnapping ? "transform 300ms cubic-bezier(0.22, 0.9, 0.3, 1)" : "none",
+              transform: "translateY(100vh)",
+              opacity: 0,
+              animation: isSnapping ? "fadeIn 1000ms ease-in 500ms forwards" : "none",
             }}
           >
-            {/* Image box - centered */}
-            <div className="flex-1 flex items-center justify-center px-8 w-full">
+            {/* Image box - bottom at 50% of screen */}
+            <div className="absolute bottom-[39%] left-0 right-0 flex justify-center px-8 w-full">
               <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
                 {dragY < 0 && currentProjectIndex < projects.length - 1 && projects[nextProjectIndex]?.images[0] && (
                   <img
@@ -172,10 +183,10 @@ const ProjectList = () => {
               </div>
             </div>
 
-            {/* Title label below image */}
-            <div className="py-2 text-center -mt-24">
+            {/* Title label - positioned 20% below image (70% down screen) */}
+            <div className="absolute top-[79%] left-0 right-0 flex justify-center w-full -translate-y-1/2">
               <h3
-                className="text-2xl font-bold tracking-tight text-black"
+                className="text-2xl font-bold tracking-tight text-black text-center"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
                 }}

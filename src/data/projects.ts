@@ -74,7 +74,7 @@ export const projects: Project[] = [
     category: "Abstract",
     thumbnail: new URL('../../images/graduation.png', import.meta.url).href,
     images: [
-      { src: new URL('../../images/graduation.png', import.meta.url).href, alt: "Abstract 1" },
+      { src: new URL('../../images/graduation.png', import.meta.url).href , alt: "Abstract 1" },
       { src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200&q=80", alt: "Abstract 2" },
       { src: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=1200&q=80", alt: "Abstract 3" },
     ],
@@ -86,9 +86,9 @@ export const projects: Project[] = [
     description: "Momenten uit het dagelijks leven op straat, vol emotie en authenticiteit.",
     year: "2023",
     category: "Street",
-    thumbnail: "https://images.unsplash.com/photo-1476973422084-e0fa66ff9456?w=800&q=80",
+    thumbnail: new URL('../../images/10a.png', import.meta.url).href,
     images: [
-      { src: "https://images.unsplash.com/photo-1476973422084-e0fa66ff9456?w=1200&q=80", alt: "Straat 1" },
+      { src: new URL('../../images/10a.png', import.meta.url).href, alt: "Straat 1" },
       { src: "https://images.unsplash.com/photo-1517732306149-e8f829eb588a?w=1200&q=80", alt: "Straat 2" },
       { src: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1200&q=80", alt: "Straat 3" },
     ],
