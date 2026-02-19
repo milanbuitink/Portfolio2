@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { projects } from "@/data/projects";
+import { projects, getHoverPosition } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -137,16 +137,10 @@ const ProjectList = () => {
     touchDeltaYRef.current = 0;
   };
 
-  const getPreviewPosition = (index: number) => {
-    // wissel tussen vaste posities per index (aanpasbaar)
-    const positions = [
-      { left: "40%", top: "40%", imgWidth: "100%" },
-      { left: "60%", top: "50%", imgWidth: "29vw" },
-      { left: "50%", top: "45%", imgWidth: "45vw" },
-      { left: "50%", top: "45%", imgWidth: "45vw" },
-      { left: "10%", top: "45%", imgWidth: "45vw" },
-    ];
-    return positions[index % positions.length];
+  // Haal hover-positie op uit de configuratie-tabel in projects.ts
+  const getPreviewPosition = (projectId: string) => {
+    const pos = getHoverPosition(projectId);
+    return { left: pos.x, top: pos.y, imgWidth: pos.size };
   };
 
   // Mobile view
@@ -222,8 +216,8 @@ const ProjectList = () => {
   return (
     <div className="relative min-h-screen flex items-center justify-center px-6 md:px-8">
       {/* Project hover images (fixed positions per title) */}
-      {projects.map((project, index) => {
-        const pos = getPreviewPosition(index);
+      {projects.map((project) => {
+        const pos = getPreviewPosition(project.id);
         return (
           <div
             key={`image-${project.id}`}
@@ -235,13 +229,22 @@ const ProjectList = () => {
               left: pos.left,
               top: pos.top,
               transform: "translate(-50%, -50%)",
+              width: pos.imgWidth,
+              height: "auto",
+              overflow: "visible",
             }}
           >
             <img
               src={project.thumbnail}
               alt={project.title}
-              style={{ width: pos.imgWidth }}
-              className="h-auto object-cover"
+              style={{
+                width: "100%",
+                height: "auto",
+                maxWidth: "none",
+                maxHeight: "none",
+                display: "block",
+              }}
+              className="object-cover"
             />
           </div>
         );

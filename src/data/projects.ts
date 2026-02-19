@@ -33,12 +33,27 @@ export const projects: Project[] = [
     thumbnail: new URL('../../images/Timbertunes.png', import.meta.url).href,
     images: [
       { src: new URL('../../images/Timbertunes.png', import.meta.url).href, alt: "Stadsgezicht" },
+      { src: new URL('../../images/ttvisie.png', import.meta.url).href, alt: "Visie" },
+      { src: new URL('../../images/ttbegane.png', import.meta.url).href, alt:  "Begane grond" },
+      { src: new URL('../../images/tteerste.png', import.meta.url).href, alt: "Eerste verdieping" },
+      { src: new URL('../../images/ttklimaat.png', import.meta.url).href, alt: "Klimaat" },
+      { src: new URL('../../images/gevelfragment.png', import.meta.url).href, alt: "Eerste verdieping" },
       { src: new URL('../../images/details.png', import.meta.url).href, alt: "Skyline" },
-      { src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1200&q=80", alt: "Architectuur" },
+      { src: new URL('../../images/ttrenders.png', import.meta.url).href, alt: "Architectuur" },
     ],
   },
-  {
-    id: "2",
+  { id: "2",
+    title: "THESIS TURIN",
+    slug: "thesis-turin",
+    description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
+    year: "2025",
+    category: "MSc 2",
+    thumbnail: new URL('../../images/thesis.png', import.meta.url).href,
+    images: [
+      { src: new URL('../../images/thesis.png', import.meta.url).href, alt: "Thesis Turin" },
+    ],
+  },
+  { id: "3",
     title: "PUBLIC BUILDING",
     slug: "portraits-of-silence",
     description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
@@ -52,7 +67,7 @@ export const projects: Project[] = [
     ],
   },
   {
-    id: "3",
+    id: "4",
     title: "SLOTERDRIJK",
     slug: "natural-elements",
     description: "De kracht en sereniteit van de natuur, vastgelegd in zijn meest pure vorm.",
@@ -66,7 +81,7 @@ export const projects: Project[] = [
     ],
   },
   {
-    id: "4",
+    id: "5      ",
     title: "GRADUATION TUD",
     slug: "abstract-forms",
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
@@ -80,7 +95,7 @@ export const projects: Project[] = [
     ],
   },
   {
-    id: "5",
+    id: "6",
     title: "VILLA 10A",
     slug: "street-stories",
     description: "Momenten uit het dagelijks leven op straat, vol emotie en authenticiteit.",
@@ -94,7 +109,7 @@ export const projects: Project[] = [
     ],
   },
   {
-    id: "6",
+    id: "7",
     title: "GRADUATION TUD",
     slug: "minimal-spaces",
     description: "Architecturale composities die de schoonheid van leegte en vorm benadrukken.",
@@ -108,6 +123,43 @@ export const projects: Project[] = [
     ],
   },
 ];
+
+// ===========================================
+// HOVER POSITIES - Pas hier de afbeelding-posities aan voor de homepage
+// x: horizontale positie ("10%" = links, "50%" = midden, "90%" = rechts)
+// y: verticale positie   ("10%" = boven, "50%" = midden, "90%" = onder)
+// size: breedte van de afbeelding (bijv. "30vw", "400px", "50%")
+// ===========================================
+
+export interface HoverPosition {
+  x: string;    // bijv. "40%", "200px"
+  y: string;    // bijv. "50%", "300px"
+  size: string; // bijv. "35vw", "400px"
+}
+
+export const projectHoverPositions: Record<string, HoverPosition> = {
+  // Project ID :  { x (links/rechts), y (boven/onder), size (breedte) }
+  
+  "1": { x: "40%",  y: "40%",  size: "70vw" },   // TIMBER TUNES
+  "2": { x: "60%",  y: "50%",  size: "70vw" },   // THESIS TURIN
+  "3": { x: "35%",  y: "45%",  size: "30vw" },   // PUBLIC BUILDING
+  "4": { x: "55%",  y: "40%",  size: "70vw" },   // SLOTERDRIJK
+  "5": { x: "45%",  y: "55%",  size: "40vw" },   // GRADUATION TUD
+  "6": { x: "50%",  y: "45%",  size: "34vw" },   // VILLA 10A
+  "7": { x: "42%",  y: "48%",  size: "38vw" },   // GRADUATION TUD (2)
+};
+
+// Standaard positie als project niet in de tabel staat
+export const defaultHoverPosition: HoverPosition = {
+  x: "50%",
+  y: "50%",
+  size: "35vw",
+};
+
+// Haal hover-positie op voor een project (op basis van ID)
+export const getHoverPosition = (projectId: string): HoverPosition => {
+  return projectHoverPositions[projectId.trim()] ?? defaultHoverPosition;
+};
 
 // Helper functie om een project te vinden op slug
 export const getProjectBySlug = (slug: string): Project | undefined => {
