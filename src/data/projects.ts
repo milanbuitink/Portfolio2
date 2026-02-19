@@ -59,9 +59,9 @@ export const projects: Project[] = [
     description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
     year: "2024",
     category: "Portrait",
-    thumbnail: new URL('../../images/pbposter.png', import.meta.url).href,
+    thumbnail: new URL('../../images/prototype.png', import.meta.url).href,
     images: [
-      { src: new URL('../../images/pbposter.png', import.meta.url).href, alt: "Portret 1" },
+      { src: new URL('../../images/prototype.png', import.meta.url).href, alt: "Portret 1" },
       { src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80", alt: "Portret 2" },
       { src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&q=80", alt: "Portret 3" },
     ],
@@ -140,9 +140,9 @@ export interface HoverPosition {
 export const projectHoverPositions: Record<string, HoverPosition> = {
   // Project ID :  { x (links/rechts), y (boven/onder), size (breedte) }
   
-  "1": { x: "40%",  y: "40%",  size: "70vw" },   // TIMBER TUNES
-  "2": { x: "60%",  y: "50%",  size: "70vw" },   // THESIS TURIN
-  "3": { x: "35%",  y: "45%",  size: "30vw" },   // PUBLIC BUILDING
+  "1": { x: "65%",  y: "54%",  size: "55vw" },   // TIMBER TUNES
+  "2": { x: "40%",  y: "50%",  size: "70vw" },   // THESIS TURIN
+  "3": { x: "50%",  y: "45%",  size: "100vw" },   // PUBLIC BUILDING
   "4": { x: "55%",  y: "40%",  size: "70vw" },   // SLOTERDRIJK
   "5": { x: "45%",  y: "55%",  size: "40vw" },   // GRADUATION TUD
   "6": { x: "50%",  y: "45%",  size: "34vw" },   // VILLA 10A
