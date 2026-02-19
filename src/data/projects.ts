@@ -26,14 +26,14 @@ export const projects: Project[] = [
   {
     id: "1",
     title: "TIMBER TUNES",
-    slug: "urban-landscapes",
+    slug: "Timber-tunes",
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2024",
-    category: "Photography",
+    category: "Premaster",
     thumbnail: new URL('../../images/Timbertunes.png', import.meta.url).href,
     images: [
       { src: new URL('../../images/Timbertunes.png', import.meta.url).href, alt: "Stadsgezicht" },
-      { src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1200&q=80", alt: "Skyline" },
+      { src: new URL('../../images/details.png', import.meta.url).href, alt: "Skyline" },
       { src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1200&q=80", alt: "Architectuur" },
     ],
   },

@@ -1,19 +1,127 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { getProjectBySlug, getAdjacentProjects } from "@/data/projects";
 import Header from "@/components/Header";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const Project = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const project = slug ? getProjectBySlug(slug) : undefined;
   const { prev, next } = slug ? getAdjacentProjects(slug) : { prev: null, next: null };
+  const [zoomImage, setZoomImage] = useState<{ src: string; alt: string } | null>(null);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const zoomViewportRef = useRef<HTMLDivElement | null>(null);
+  const zoomImageRef = useRef<HTMLImageElement | null>(null);
+  const panStartRef = useRef({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
+
+  const isDesktopViewport = () => window.matchMedia("(min-width: 768px)").matches;
+
+  const openZoom = (src: string, alt: string) => {
+    if (!isDesktopViewport()) return;
+    setZoomImage({ src, alt });
+    setZoomScale(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  const closeZoom = () => {
+    setZoomImage(null);
+    setZoomScale(1);
+    setPanOffset({ x: 0, y: 0 });
+    setIsPanning(false);
+  };
+
+  const clampPan = (x: number, y: number, scale: number) => {
+    const viewport = zoomViewportRef.current;
+    const image = zoomImageRef.current;
+    if (!viewport || !image || !image.naturalWidth || !image.naturalHeight) {
+      return { x, y };
+    }
+
+    const viewportWidth = viewport.clientWidth;
+    const viewportHeight = viewport.clientHeight;
+
+    const fitScale = Math.min(
+      viewportWidth / image.naturalWidth,
+      viewportHeight / image.naturalHeight,
+    );
+
+    const renderedWidth = image.naturalWidth * fitScale * scale;
+    const renderedHeight = image.naturalHeight * fitScale * scale;
+
+    const maxX = Math.max(0, (renderedWidth - viewportWidth) / 2);
+    const maxY = Math.max(0, (renderedHeight - viewportHeight) / 2);
+
+    return {
+      x: Math.min(maxX, Math.max(-maxX, x)),
+      y: Math.min(maxY, Math.max(-maxY, y)),
+    };
+  };
+
+  const handleZoomWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const delta = event.deltaY;
+    setZoomScale((currentScale) => {
+      const nextScale = Math.min(Math.max(delta < 0 ? currentScale + 0.12 : currentScale - 0.12, 1), 4);
+      setPanOffset((currentPan) => clampPan(currentPan.x, currentPan.y, nextScale));
+      return nextScale;
+    });
+  };
+
+  const handlePanStart = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (zoomScale <= 1) return;
+    setIsPanning(true);
+    panStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      offsetX: panOffset.x,
+      offsetY: panOffset.y,
+    };
+  };
+
+  const handlePanMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!isPanning) return;
+    event.preventDefault();
+
+    const deltaX = event.clientX - panStartRef.current.x;
+    const deltaY = event.clientY - panStartRef.current.y;
+    const nextX = panStartRef.current.offsetX + deltaX;
+    const nextY = panStartRef.current.offsetY + deltaY;
+
+    setPanOffset(clampPan(nextX, nextY, zoomScale));
+  };
+
+  const handlePanEnd = () => {
+    setIsPanning(false);
+  };
 
   useEffect(() => {
     // Scroll naar top bij pagina wissel
     window.scrollTo(0, 0);
   }, [slug]);
+
+  useEffect(() => {
+    if (!zoomImage) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeZoom();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [zoomImage]);
+
+  useEffect(() => {
+    if (!zoomImage) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [zoomImage]);
 
   if (!project) {
     return (
@@ -38,11 +146,14 @@ const Project = () => {
       <main className="pt-24 pb-32">
         {/* Hero Image */}
         <section className="w-full px-4 md:px-8 lg:px-16 mb-12 md:mb-16">
-          <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden">
+          <div className="project-image-frame relative aspect-[16/9] md:aspect-[21/9] overflow-hidden">
             <img
               src={project.images[0]?.src || project.thumbnail}
               alt={project.title}
-              className="w-full h-full object-cover"
+              className="project-image-quality block w-full h-full object-cover cursor-pointer"
+              loading="eager"
+              decoding="async"
+              onClick={() => openZoom(project.images[0]?.src || project.thumbnail, project.title)}
             />
           </div>
         </section>
@@ -73,12 +184,15 @@ const Project = () => {
           {project.images.slice(1).map((image, index) => (
             <div
               key={index}
-              className="relative w-full overflow-hidden"
+              className="project-image-frame relative w-full overflow-hidden"
             >
               <img
                 src={image.src}
                 alt={image.alt}
-                className="w-full h-auto object-cover"
+                className="project-image-quality block w-full h-auto object-cover cursor-pointer"
+                loading="lazy"
+                decoding="async"
+                onClick={() => openZoom(image.src, image.alt)}
               />
             </div>
           ))}
@@ -123,6 +237,52 @@ const Project = () => {
           </div>
         </section>
       </main>
+
+      {/* Desktop image zoom modal */}
+      {zoomImage && (
+        <div className="fixed inset-0 z-[120] hidden md:flex items-center justify-center bg-black/70 p-6" onClick={closeZoom}>
+          <div
+            className="relative w-full max-w-[1200px] h-[85vh] bg-transparent overflow-visible"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                closeZoom();
+              }}
+              className="absolute -right-1 -top-16 z-20 p-0 m-0 bg-transparent border-none text-white hover:text-neutral-300 focus:outline-none"
+              style={{ boxShadow: "none" }}
+              aria-label="Sluiten"
+            >
+              <X className="w-9 h-9" />
+            </button>
+
+            <div
+              ref={zoomViewportRef}
+              className={`hide-scrollbar h-full w-full overflow-hidden flex items-center justify-center ${zoomScale > 1 ? (isPanning ? "cursor-grabbing" : "cursor-grab") : "cursor-default"}`}
+              onWheel={handleZoomWheel}
+              onMouseDown={handlePanStart}
+              onMouseMove={handlePanMove}
+              onMouseUp={handlePanEnd}
+              onMouseLeave={handlePanEnd}
+            >
+              <img
+                ref={zoomImageRef}
+                src={zoomImage.src}
+                alt={zoomImage.alt}
+                className="project-image-quality block max-w-full max-h-full w-auto h-auto object-contain select-none"
+                style={{
+                  transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                  transformOrigin: "center center",
+                  transition: isPanning ? "none" : "transform 120ms ease-out",
+                }}
+                draggable={false}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

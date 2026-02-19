@@ -119,6 +119,38 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  .project-image-frame {
+    line-height: 0;
+    background: hsl(var(--background));
+  }
+
+  .project-image-quality {
+    image-rendering: smooth;
+    -ms-interpolation-mode: bicubic;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    /* Forceer anti-aliasing voor alle browsers */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimizeQuality;
+    image-rendering: crisp-edges;
+    image-rendering: high-quality;
+    /* Safari/Chrome anti-aliasing */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
 }
 
 /* Fade in animation for initial page load */

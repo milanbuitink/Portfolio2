@@ -7,77 +7,134 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const ProjectList = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const isMobile = useIsMobile();
-  
-  // Mobile swipe state - simplified
-  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
-  const [dragY, setDragY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isSnapping, setIsSnapping] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartRef = useRef(0);
 
-  // Prevent page scroll when dragging on mobile by using a non-passive listener
+  // Mobile swipe state
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [overlayOpacity, setOverlayOpacity] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const touchDeltaYRef = useRef(0);
+  const timeoutRef = useRef<number[]>([]);
+  const isMountedRef = useRef(true);
+
+  // Prevent page scroll/pull-to-refresh on mobile list view
   useEffect(() => {
+    if (!isMobile) return;
+
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalBodyOverscroll = document.body.style.overscrollBehavior;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+
     const el = containerRef.current;
-    if (!el) return;
+    if (!el) {
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.body.style.overscrollBehavior = originalBodyOverscroll;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        document.documentElement.style.overscrollBehavior = originalHtmlOverscroll;
+      };
+    }
 
     const onMove = (e: TouchEvent) => {
-      if (isDragging) {
-        e.preventDefault();
-      }
+      e.preventDefault();
     };
 
     el.addEventListener("touchmove", onMove as EventListener, { passive: false });
-    return () => el.removeEventListener("touchmove", onMove as EventListener);
-  }, [isDragging]);
+    return () => {
+      el.removeEventListener("touchmove", onMove as EventListener);
+      document.body.style.overflow = originalBodyOverflow;
+      document.body.style.overscrollBehavior = originalBodyOverscroll;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.documentElement.style.overscrollBehavior = originalHtmlOverscroll;
+    };
+  }, [isMobile]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      timeoutRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    };
+  }, []);
 
   const currentProject = projects[currentProjectIndex];
-  const nextProjectIndex = Math.min(currentProjectIndex + 1, projects.length - 1);
-  const prevProjectIndex = Math.max(currentProjectIndex - 1, 0);
 
-  // Touch handlers
+  const preloadImage = (src?: string) =>
+    new Promise<void>((resolve) => {
+      if (!src) {
+        resolve();
+        return;
+      }
+
+      const image = new Image();
+      image.onload = () => resolve();
+      image.onerror = () => resolve();
+      image.src = src;
+
+      if (image.complete) {
+        resolve();
+      }
+    });
+
+  const runProjectTransition = (nextIndex: number) => {
+    if (nextIndex === currentProjectIndex || isTransitioning) return;
+
+    setIsTransitioning(true);
+    setOverlayOpacity(1);
+
+    const swapTimeout = window.setTimeout(() => {
+      const nextImageSrc = projects[nextIndex]?.images[0]?.src;
+
+      void preloadImage(nextImageSrc).then(() => {
+        if (!isMountedRef.current) return;
+        setCurrentProjectIndex(nextIndex);
+        window.requestAnimationFrame(() => {
+          if (!isMountedRef.current) return;
+          setOverlayOpacity(0);
+        });
+      });
+    }, 750);
+
+    const finishTimeout = window.setTimeout(() => {
+      setIsTransitioning(false);
+    }, 1500);
+
+    timeoutRef.current.push(swapTimeout, finishTimeout);
+  };
+
+  // Touch handlers (1 swipe = trigger transition)
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isSnapping) return;
-    touchStartRef.current = e.targetTouches[0].clientY;
-    setIsDragging(true);
+    if (isTransitioning) return;
+    touchStartYRef.current = e.targetTouches[0].clientY;
+    touchDeltaYRef.current = 0;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || isSnapping) return;
-    const currentY = e.touches[0].clientY;
-    const delta = currentY - touchStartRef.current;
-    // Apply drag resistance
-    setDragY(delta * 0.8);
+    if (isTransitioning || touchStartYRef.current === null) return;
+    const currentY = e.targetTouches[0].clientY;
+    touchDeltaYRef.current = currentY - touchStartYRef.current;
   };
 
   const handleTouchEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
+    if (isTransitioning || touchStartYRef.current === null) return;
 
-    const threshold = 80; // swipe distance to trigger snap
+    const deltaY = touchDeltaYRef.current;
+    const threshold = 50;
 
-    if (dragY < -threshold && currentProjectIndex < projects.length - 1) {
-      // Swipe up - go to next project
-      setIsSnapping(true);
-      setDragY(-window.innerHeight);
-      setTimeout(() => {
-        setCurrentProjectIndex((i) => i + 1);
-        setDragY(0);
-        setIsSnapping(false);
-      }, 300);
-    } else if (dragY > threshold && currentProjectIndex > 0) {
-      // Swipe down - go to previous project
-      setIsSnapping(true);
-      setDragY(window.innerHeight);
-      setTimeout(() => {
-        setCurrentProjectIndex((i) => i - 1);
-        setDragY(0);
-        setIsSnapping(false);
-      }, 300);
-    } else {
-      // Not enough distance - snap back
-      setDragY(0);
+    if (deltaY < -threshold && currentProjectIndex < projects.length - 1) {
+      runProjectTransition(currentProjectIndex + 1);
+    } else if (deltaY > threshold && currentProjectIndex > 0) {
+      runProjectTransition(currentProjectIndex - 1);
     }
+
+    touchStartYRef.current = null;
+    touchDeltaYRef.current = 0;
   };
 
   const getPreviewPosition = (index: number) => {
@@ -97,110 +154,58 @@ const ProjectList = () => {
     return (
       <Link
         to={`/project/${currentProject?.slug}`}
-        className="block w-full h-screen"
+        className="block w-full h-[100dvh]"
         onClick={(e) => {
-          // prevent navigation if user was dragging
-          if (Math.abs(dragY) > 10) e.preventDefault();
+          if (isTransitioning || touchStartYRef.current !== null) e.preventDefault();
         }}
       >
         <div
           ref={containerRef}
-          className="relative w-full h-screen overflow-hidden bg-white flex flex-col"
+          className="relative w-full h-[100dvh] overflow-hidden bg-white flex flex-col touch-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          style={{ overscrollBehavior: "none" }}
         >
-          {/* White fade overlay */}
-          <div
-            className="absolute inset-0 bg-white pointer-events-none z-10"
-            style={{
-              opacity: isSnapping ? 1 : 0,
-              transition: isSnapping ? "opacity 1000ms ease-out 0ms, opacity 1000ms ease-in 1000ms" : "none",
-            }}
-          />
-
-          {/* Current project - follows finger during drag */}
+          {/* Project content blijft op exact dezelfde plek */}
           <div
             className="absolute inset-0"
             style={{
-              transform: "translateY(0px)",
-              opacity: isSnapping ? 0 : 1,
-              transition: "opacity 1000ms ease-in-out",
+              opacity: 1,
+              transition: "none",
             }}
           >
-            {/* Image box - bottom at 50% of screen */}
             <div className="absolute bottom-[39%] left-0 right-0 flex justify-center px-4 w-full">
               <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
                 {currentProject?.images[0] && (
                   <img
                     src={currentProject.images[0].src}
                     alt={currentProject.title}
-                    className="w-full h-full object-cover"
+                    className="block w-full h-full object-cover"
                   />
                 )}
               </div>
             </div>
-
-            {/* Title label - positioned 20% below image (70% down screen) */}
             <div className="absolute top-[71%] left-0 right-0 flex justify-center w-full -translate-y-1/2">
               <h3
                 className="text-2xl font-bold tracking-tight text-black text-center"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                }}
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 {currentProject?.title}
               </h3>
             </div>
           </div>
 
-          {/* Next/Prev project preview - appears from bottom/top */}
+          {/* Fade overlay: 0.75s uit naar wit + 0.75s in */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 z-20 bg-white pointer-events-none"
             style={{
-              transform: "translateY(100vh)",
-              opacity: 0,
-              animation: isSnapping ? "fadeIn 1000ms ease-in 500ms forwards" : "none",
+              opacity: overlayOpacity,
+              transition: "opacity 750ms ease",
             }}
-          >
-            {/* Image box - bottom at 50% of screen */}
-            <div className="absolute bottom-[39%] left-0 right-0 flex justify-center px-8 w-full">
-              <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
-                {dragY < 0 && currentProjectIndex < projects.length - 1 && projects[nextProjectIndex]?.images[0] && (
-                  <img
-                    src={projects[nextProjectIndex].images[0].src}
-                    alt={projects[nextProjectIndex].title}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-                {dragY > 0 && currentProjectIndex > 0 && projects[prevProjectIndex]?.images[0] && (
-                  <img
-                    src={projects[prevProjectIndex].images[0].src}
-                    alt={projects[prevProjectIndex].title}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-            </div>
+          />
 
-            {/* Title label - positioned 20% below image (70% down screen) */}
-            <div className="absolute top-[79%] left-0 right-0 flex justify-center w-full -translate-y-1/2">
-              <h3
-                className="text-2xl font-bold tracking-tight text-black text-center"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                }}
-              >
-                {dragY < 0 && currentProjectIndex < projects.length - 1
-                  ? projects[nextProjectIndex]?.title
-                  : dragY > 0 && currentProjectIndex > 0
-                  ? projects[prevProjectIndex]?.title
-                  : ""}
-              </h3>
-            </div>
-          </div>
-
-          {/* Swipe hint - bottom right, first page only */}
+          {/* Swipe hint - alleen op eerste pagina */}
           {currentProjectIndex === 0 && (
             <div className="absolute bottom-20 right-6 z-20">
               <div className="text-black/50 text-xs tracking-widest font-light pointer-events-none">
