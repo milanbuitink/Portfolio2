@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { projects } from "@/data/projects";
 import Header from "@/components/Header";
+import OptimizedImage from "@/components/OptimizedImage";
+import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +37,7 @@ const Archive = () => {
               >
                 {/* Image */}
                 <div className="aspect-[4/3] overflow-hidden bg-secondary">
-                  <img
+                  <OptimizedImage
                     src={project.thumbnail}
                     alt={project.title}
                     className={cn(
@@ -45,6 +47,7 @@ const Archive = () => {
                         : "opacity-100",
                       "group-hover:scale-105"
                     )}
+                    blurDataURL={getBlurPlaceholder(project.thumbnail)}
                   />
                 </div>
 

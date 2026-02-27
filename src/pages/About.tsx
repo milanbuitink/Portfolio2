@@ -1,4 +1,6 @@
 import Header from "@/components/Header";
+import OptimizedImage from "@/components/OptimizedImage";
+import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { siteConfig } from "@/data/siteConfig";
 
 const About = () => {
@@ -14,10 +16,11 @@ const About = () => {
             {/* Portrait */}
             <div className="relative">
               <div className="aspect-[3/4] overflow-hidden sticky top-24">
-                <img
+                <OptimizedImage
                   src={about.portrait}
                   alt={siteConfig.name}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  blurDataURL={getBlurPlaceholder(about.portrait)}
                 />
               </div>
             </div>

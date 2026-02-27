@@ -2,6 +2,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { getProjectBySlug, getAdjacentProjects } from "@/data/projects";
 import Header from "@/components/Header";
+import OptimizedImage from "@/components/OptimizedImage";
+import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { useEffect, useRef, useState } from "react";
 
 const Project = () => {
@@ -146,14 +148,16 @@ const Project = () => {
       <main className="pt-24 pb-32">
         {/* Hero Image */}
         <section className="w-full px-4 md:px-8 lg:px-16 mb-12 md:mb-16">
-          <div className="project-image-frame relative aspect-[16/9] md:aspect-[21/9] overflow-hidden">
-            <img
+          <div
+            className="project-image-frame relative aspect-[16/9] md:aspect-[21/9] overflow-hidden cursor-pointer"
+            onClick={() => openZoom(project.images[0]?.src || project.thumbnail, project.title)}
+          >
+            <OptimizedImage
               src={project.images[0]?.src || project.thumbnail}
               alt={project.title}
-              className="project-image-quality block w-full h-full object-cover cursor-pointer"
-              loading="eager"
-              decoding="async"
-              onClick={() => openZoom(project.images[0]?.src || project.thumbnail, project.title)}
+              className="project-image-quality w-full h-full object-cover"
+              blurDataURL={getBlurPlaceholder(project.images[0]?.src || project.thumbnail)}
+              priority={true}
             />
           </div>
         </section>
@@ -184,15 +188,14 @@ const Project = () => {
           {project.images.slice(1).map((image, index) => (
             <div
               key={index}
-              className="project-image-frame relative w-full overflow-hidden"
+              className="project-image-frame relative w-full overflow-hidden cursor-pointer"
+              onClick={() => openZoom(image.src, image.alt)}
             >
-              <img
+              <OptimizedImage
                 src={image.src}
                 alt={image.alt}
-                className="project-image-quality block w-full h-auto object-cover cursor-pointer"
-                loading="lazy"
-                decoding="async"
-                onClick={() => openZoom(image.src, image.alt)}
+                className="project-image-quality w-full h-auto object-cover"
+                blurDataURL={getBlurPlaceholder(image.src)}
               />
             </div>
           ))}

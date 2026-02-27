@@ -1,141 +1,211 @@
-import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { projects, getHoverPosition } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Observer } from "gsap/all";
 
-const ProjectList = () => {
-  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
-  const isMobile = useIsMobile();
+gsap.registerPlugin(ScrollTrigger, Observer);
 
-  // Mobile swipe state
-  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [overlayOpacity, setOverlayOpacity] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartYRef = useRef<number | null>(null);
-  const touchDeltaYRef = useRef(0);
-  const timeoutRef = useRef<number[]>([]);
-  const isMountedRef = useRef(true);
+// ─── Mobile: GSAP Observer-driven fullscreen vertical swipe ───────────────
+const MobileSwipePortfolio = () => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const sectionsRef = useRef<HTMLDivElement[]>([]);
+  const currentIndex = useRef(0);
+  const animating = useRef(false);
+  const navigate = useNavigate();
 
-  // Prevent page scroll/pull-to-refresh on mobile list view
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalBodyOverscroll = document.body.style.overscrollBehavior;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    const originalHtmlOverscroll = document.documentElement.style.overscrollBehavior;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.overscrollBehavior = "none";
-    document.documentElement.style.overflow = "hidden";
-    document.documentElement.style.overscrollBehavior = "none";
-
-    const el = containerRef.current;
-    if (!el) {
-      return () => {
-        document.body.style.overflow = originalBodyOverflow;
-        document.body.style.overscrollBehavior = originalBodyOverscroll;
-        document.documentElement.style.overflow = originalHtmlOverflow;
-        document.documentElement.style.overscrollBehavior = originalHtmlOverscroll;
-      };
+  const addSection = useCallback((el: HTMLDivElement | null) => {
+    if (el && !sectionsRef.current.includes(el)) {
+      sectionsRef.current.push(el);
     }
-
-    const onMove = (e: TouchEvent) => {
-      e.preventDefault();
-    };
-
-    el.addEventListener("touchmove", onMove as EventListener, { passive: false });
-    return () => {
-      el.removeEventListener("touchmove", onMove as EventListener);
-      document.body.style.overflow = originalBodyOverflow;
-      document.body.style.overscrollBehavior = originalBodyOverscroll;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      document.documentElement.style.overscrollBehavior = originalHtmlOverscroll;
-    };
-  }, [isMobile]);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      timeoutRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
-    };
   }, []);
 
-  const currentProject = projects[currentProjectIndex];
+  useLayoutEffect(() => {
+    const sections = sectionsRef.current;
+    if (sections.length === 0) return;
 
-  const preloadImage = (src?: string) =>
-    new Promise<void>((resolve) => {
-      if (!src) {
-        resolve();
-        return;
-      }
+    // Lock the viewport
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
 
-      const image = new Image();
-      image.onload = () => resolve();
-      image.onerror = () => resolve();
-      image.src = src;
+    // Initial state: all sections stacked, only first visible
+    sections.forEach((section, i) => {
+      const img = section.querySelector<HTMLElement>(".swipe-img");
+      const title = section.querySelector<HTMLElement>(".swipe-title");
 
-      if (image.complete) {
-        resolve();
+      gsap.set(section, {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: i === 0 ? 1 : 0,
+        visibility: i === 0 ? "visible" : "hidden",
+        willChange: "transform",
+      });
+
+      if (i === 0) {
+        // First section starts revealed
+        gsap.set(img, { clipPath: "inset(0% 0% 0% 0%)" });
+        gsap.set(title, { opacity: 1, y: 0 });
+      } else {
+        gsap.set(img, { clipPath: "inset(100% 0% 0% 0%)" });
+        gsap.set(title, { opacity: 0, y: 40 });
       }
     });
 
-  const runProjectTransition = (nextIndex: number) => {
-    if (nextIndex === currentProjectIndex || isTransitioning) return;
+    const goTo = (index: number) => {
+      if (animating.current) return;
+      if (index < 0 || index >= sections.length) return;
+      if (index === currentIndex.current) return;
+      animating.current = true;
 
-    setIsTransitioning(true);
-    setOverlayOpacity(1);
+      const leaving = sections[currentIndex.current];
+      const entering = sections[index];
+      const enterImg = entering.querySelector<HTMLElement>(".swipe-img");
+      const enterTitle = entering.querySelector<HTMLElement>(".swipe-title");
+      const leaveImg = leaving.querySelector<HTMLElement>(".swipe-img");
+      const leaveTitle = leaving.querySelector<HTMLElement>(".swipe-title");
+      const isDown = index > currentIndex.current;
 
-    const swapTimeout = window.setTimeout(() => {
-      const nextImageSrc = projects[nextIndex]?.images[0]?.src;
-
-      void preloadImage(nextImageSrc).then(() => {
-        if (!isMountedRef.current) return;
-        setCurrentProjectIndex(nextIndex);
-        window.requestAnimationFrame(() => {
-          if (!isMountedRef.current) return;
-          setOverlayOpacity(0);
-        });
+      const tl = gsap.timeline({
+        onComplete: () => {
+          gsap.set(leaving, { visibility: "hidden", zIndex: 0 });
+          currentIndex.current = index;
+          animating.current = false;
+        },
       });
-    }, 750);
 
-    const finishTimeout = window.setTimeout(() => {
-      setIsTransitioning(false);
-    }, 1500);
+      // Bring entering section on top
+      gsap.set(entering, { visibility: "visible", zIndex: 2 });
+      gsap.set(leaving, { zIndex: 1 });
 
-    timeoutRef.current.push(swapTimeout, finishTimeout);
-  };
+      // Phase 1: hide leaving title
+      tl.to(leaveTitle, {
+        opacity: 0,
+        y: isDown ? -30 : 30,
+        duration: 0.3,
+        ease: "power2.in",
+      });
 
-  // Touch handlers (1 swipe = trigger transition)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (isTransitioning) return;
-    touchStartYRef.current = e.targetTouches[0].clientY;
-    touchDeltaYRef.current = 0;
-  };
+      // Phase 2: mask out leaving image, mask in entering image
+      tl.to(
+        leaveImg,
+        {
+          clipPath: isDown ? "inset(0% 0% 100% 0%)" : "inset(100% 0% 0% 0%)",
+          duration: 0.7,
+          ease: "power3.inOut",
+        },
+        "-=0.1"
+      );
+      tl.fromTo(
+        enterImg,
+        { clipPath: isDown ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 100% 0%)" },
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 0.7,
+          ease: "power3.inOut",
+        },
+        "<"
+      );
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (isTransitioning || touchStartYRef.current === null) return;
-    const currentY = e.targetTouches[0].clientY;
-    touchDeltaYRef.current = currentY - touchStartYRef.current;
-  };
+      // Phase 3: Reveal entering title
+      tl.fromTo(
+        enterTitle,
+        { opacity: 0, y: isDown ? 40 : -40 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        "-=0.2"
+      );
+    };
 
-  const handleTouchEnd = () => {
-    if (isTransitioning || touchStartYRef.current === null) return;
+    // GSAP Observer for touch swipe + mouse wheel
+    const observer = Observer.create({
+      type: "touch,wheel",
+      target: wrapperRef.current!,
+      wheelSpeed: -1,
+      tolerance: 30,
+      preventDefault: true,
+      onUp: () => goTo(currentIndex.current + 1),
+      onDown: () => goTo(currentIndex.current - 1),
+    });
 
-    const deltaY = touchDeltaYRef.current;
-    const threshold = 50;
+    return () => {
+      observer.kill();
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      sectionsRef.current = [];
+    };
+  }, []);
 
-    if (deltaY < -threshold && currentProjectIndex < projects.length - 1) {
-      runProjectTransition(currentProjectIndex + 1);
-    } else if (deltaY > threshold && currentProjectIndex > 0) {
-      runProjectTransition(currentProjectIndex - 1);
+  return (
+    <div
+      ref={wrapperRef}
+      className="fixed inset-0 w-full h-[100dvh] bg-white overflow-hidden"
+      style={{ touchAction: "none", overscrollBehavior: "none" }}
+    >
+      {projects.map((project, i) => (
+        <div key={project.id} ref={addSection} className="absolute inset-0">
+          {/* Image with clip-path mask for reveal animation */}
+          <div
+            className="swipe-img absolute inset-0 will-change-[clip-path]"
+            onClick={() => navigate(`/project/${project.slug}`)}
+          >
+            <img
+              src={project.images[0]?.src || project.thumbnail}
+              alt={project.title}
+              loading={i < 2 ? "eager" : "lazy"}
+              decoding="async"
+              className="block w-full h-full object-contain"
+              style={{ willChange: "transform" }}
+            />
+          </div>
+
+          {/* Title overlay */}
+          <div className="swipe-title absolute bottom-0 left-0 right-0 z-10 px-6 pb-24 pointer-events-none will-change-[transform,opacity]">
+            <Link
+              to={`/project/${project.slug}`}
+              className="pointer-events-auto"
+            >
+              <h3
+                className="text-3xl font-bold tracking-tight text-foreground"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                {project.title}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1 font-light tracking-wide">
+                {project.year} · {project.category}
+              </p>
+            </Link>
+          </div>
+
+          {/* Swipe hint on first slide */}
+          {i === 0 && (
+            <div className="absolute bottom-10 right-6 z-20 pointer-events-none">
+              <span className="text-white/50 text-xs tracking-widest font-light animate-bounce">
+                swipe ↑
+              </span>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ─── Desktop: ScrollTrigger snap sections ─────────────────────────────────
+const DesktopScrollPortfolio = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const panelsRef = useRef<HTMLDivElement[]>([]);
+  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+
+  const addPanel = useCallback((el: HTMLDivElement | null) => {
+    if (el && !panelsRef.current.includes(el)) {
+      panelsRef.current.push(el);
     }
-
-    touchStartYRef.current = null;
-    touchDeltaYRef.current = 0;
-  };
+  }, []);
 
   // Haal hover-positie op uit de configuratie-tabel in projects.ts
   const getPreviewPosition = (projectId: string) => {
@@ -143,149 +213,177 @@ const ProjectList = () => {
     return { left: pos.x, top: pos.y, imgWidth: pos.size };
   };
 
-  // Mobile view
-  if (isMobile) {
-    return (
-      <Link
-        to={`/project/${currentProject?.slug}`}
-        className="block w-full h-[100dvh]"
-        onClick={(e) => {
-          if (isTransitioning || touchStartYRef.current !== null) e.preventDefault();
-        }}
-      >
-        <div
-          ref={containerRef}
-          className="relative w-full h-[100dvh] overflow-hidden bg-white flex flex-col touch-none"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          style={{ overscrollBehavior: "none" }}
-        >
-          {/* Project content blijft op exact dezelfde plek */}
-          <div
-            className="absolute inset-0"
-            style={{
+  useLayoutEffect(() => {
+    const panels = panelsRef.current;
+    if (panels.length === 0) return;
+
+    const ctx = gsap.context(() => {
+      // Each panel gets its own ScrollTrigger with snap
+      panels.forEach((panel) => {
+        const img = panel.querySelector<HTMLElement>(".panel-img");
+        const title = panel.querySelector<HTMLElement>(".panel-title");
+
+        // Image reveal: vertical clip-path mask
+        if (img) {
+          gsap.fromTo(
+            img,
+            { clipPath: "inset(100% 0% 0% 0%)" },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              duration: 1,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: panel,
+                start: "top 80%",
+                end: "top 20%",
+                scrub: 0.6,
+              },
+            }
+          );
+        }
+
+        // Title: fade + slide up after image starts revealing
+        if (title) {
+          gsap.fromTo(
+            title,
+            { opacity: 0, y: 50 },
+            {
               opacity: 1,
-              transition: "none",
-            }}
-          >
-            <div className="absolute bottom-[39%] left-0 right-0 flex justify-center px-4 w-full">
-              <div className="overflow-hidden w-full max-w-sm aspect-video flex items-center justify-center bg-white">
-                {currentProject?.images[0] && (
-                  <img
-                    src={currentProject.images[0].src}
-                    alt={currentProject.title}
-                    className="block w-full h-full object-cover"
-                  />
-                )}
-              </div>
-            </div>
-            <div className="absolute top-[71%] left-0 right-0 flex justify-center w-full -translate-y-1/2">
-              <h3
-                className="text-2xl font-bold tracking-tight text-black text-center"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                {currentProject?.title}
-              </h3>
-            </div>
-          </div>
+              y: 0,
+              duration: 0.8,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: panel,
+                start: "top 50%",
+                toggleActions: "play none none reverse",
+              },
+            }
+          );
+        }
+      });
 
-          {/* Fade overlay: 0.75s uit naar wit + 0.75s in */}
-          <div
-            className="absolute inset-0 z-20 bg-white pointer-events-none"
-            style={{
-              opacity: overlayOpacity,
-              transition: "opacity 750ms ease",
-            }}
-          />
+      // Snap scrolling
+      ScrollTrigger.create({
+        snap: {
+          snapTo: 1 / (panels.length - 1),
+          duration: { min: 0.3, max: 0.6 },
+          ease: "power1.inOut",
+        },
+      });
+    }, containerRef);
 
-          {/* Swipe hint - alleen op eerste pagina */}
-          {currentProjectIndex === 0 && (
-            <div className="absolute bottom-20 right-6 z-20">
-              <div className="text-black/50 text-xs tracking-widest font-light pointer-events-none">
-                swipe ↑
-              </div>
-            </div>
-          )}
-        </div>
-      </Link>
-    );
-  }
+    return () => {
+      ctx.revert();
+      panelsRef.current = [];
+    };
+  }, []);
 
-  // Desktop view (existing hover functionality)
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-6 md:px-8">
-      {/* Project hover images (fixed positions per title) */}
+    <div ref={containerRef}>
       {projects.map((project) => {
         const pos = getPreviewPosition(project.id);
         return (
-          <div
-            key={`image-${project.id}`}
-            className={cn(
-              "fixed pointer-events-none z-0 transition-opacity duration-300 ease-out",
-              hoveredProject === project.id ? "opacity-100" : "opacity-0"
-            )}
-            style={{
-              left: pos.left,
-              top: pos.top,
-              transform: "translate(-50%, -50%)",
-              width: pos.imgWidth,
-              height: "auto",
-              overflow: "visible",
-            }}
+          <section
+            key={project.id}
+            ref={addPanel}
+            className="relative h-screen flex items-center justify-center overflow-hidden"
           >
-            <img
-              src={project.thumbnail}
-              alt={project.title}
+            {/* Background image with clip-path reveal */}
+            <div
+              className="panel-img absolute inset-0 will-change-[clip-path]"
               style={{
-                width: "100%",
+                left: pos.left,
+                top: pos.top,
+                transform: "translate(-50%, -50%)",
+                width: pos.imgWidth,
                 height: "auto",
-                maxWidth: "none",
-                maxHeight: "none",
-                display: "block",
+                overflow: "visible",
               }}
-              className="object-cover"
-            />
-          </div>
+            >
+              <img
+                src={project.thumbnail}
+                alt={project.title}
+                loading="lazy"
+                decoding="async"
+                className="block w-full h-auto"
+                style={{
+                  maxWidth: "none",
+                  maxHeight: "none",
+                  willChange: "transform",
+                }}
+              />
+            </div>
+
+            {/* Hover preview (same as before, shown on title hover) */}
+            <div
+              className={cn(
+                "fixed pointer-events-none z-0 transition-opacity duration-300 ease-out",
+                hoveredProject === project.id ? "opacity-100" : "opacity-0"
+              )}
+              style={{
+                left: pos.left,
+                top: pos.top,
+                transform: "translate(-50%, -50%)",
+                width: pos.imgWidth,
+                height: "auto",
+                overflow: "visible",
+              }}
+            >
+              <img
+                src={project.thumbnail}
+                alt={project.title}
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: "none",
+                  maxHeight: "none",
+                  display: "block",
+                }}
+                className="object-cover"
+              />
+            </div>
+
+            {/* Title overlay */}
+            <div className="panel-title relative z-20 text-center will-change-[transform,opacity]">
+              <Link
+                to={`/project/${project.slug}`}
+                className="block group"
+                onMouseEnter={() => setHoveredProject(project.id)}
+                onMouseLeave={() => setHoveredProject(null)}
+              >
+                <span
+                  className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight transition-all duration-300 group-hover:tracking-wider"
+                  style={{
+                    fontFamily: "'Montserrat', sans-serif",
+                    opacity: hoveredProject
+                      ? hoveredProject === project.id
+                        ? 1
+                        : 0.2
+                      : 1,
+                  }}
+                >
+                  {project.title}
+                </span>
+              </Link>
+            </div>
+          </section>
         );
       })}
-
-      {/* Project lijst */}
-      <nav className="relative z-20 text-center py-32">
-        <ul className="space-y-2 md:space-y-3">
-          {projects.map((project, index) => {
-            // Bereken opacity voor gradatie effect (donker naar licht)
-            const opacity = 1 - (index / (projects.length - 1)) * 0.5;
-
-            return (
-              <li key={project.id}>
-                <Link
-                  to={`/project/${project.slug}`}
-                  className="block group"
-                  onMouseEnter={() => setHoveredProject(project.id)}
-                  onMouseLeave={() => setHoveredProject(null)}
-                >
-                  <span
-                    className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight transition-all duration-300 group-hover:tracking-wider"
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      opacity: hoveredProject
-                        ? hoveredProject === project.id
-                          ? 1
-                          : 0.2
-                        : opacity,
-                    }}
-                  >
-                    {project.title}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
     </div>
   );
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────
+const ProjectList = () => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <MobileSwipePortfolio />;
+  }
+
+  return <DesktopScrollPortfolio />;
 };
 
 export default ProjectList;
