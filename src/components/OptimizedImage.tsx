@@ -6,6 +6,8 @@ interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
   blurDataURL?: string;
   /** Mark as high-priority (eager loading, high fetch priority) — use for hero/above-fold images */
   priority?: boolean;
+  /** Extra classes applied to the wrapper div */
+  containerClassName?: string;
 }
 
 /**
@@ -20,6 +22,7 @@ const OptimizedImage = ({
   src,
   alt = "",
   className,
+  containerClassName,
   blurDataURL,
   priority = false,
   style,
@@ -36,7 +39,7 @@ const OptimizedImage = ({
   }, [src]);
 
   return (
-    <div className="relative overflow-hidden">
+    <div className={cn("relative overflow-hidden", containerClassName)}>
       {/* Blur placeholder backdrop */}
       {blurDataURL && (
         <img

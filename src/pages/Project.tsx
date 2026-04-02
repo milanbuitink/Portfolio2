@@ -156,6 +156,7 @@ const Project = () => {
               src={project.images[0]?.src || project.thumbnail}
               alt={project.title}
               className="project-image-quality w-full h-full object-cover"
+              containerClassName="absolute inset-0"
               blurDataURL={getBlurPlaceholder(project.images[0]?.src || project.thumbnail)}
               priority={true}
             />

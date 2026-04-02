@@ -36,7 +36,7 @@ const Archive = () => {
                 onMouseLeave={() => setHoveredId(null)}
               >
                 {/* Image */}
-                <div className="aspect-[4/3] overflow-hidden bg-secondary">
+                <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
                   <OptimizedImage
                     src={project.thumbnail}
                     alt={project.title}
@@ -47,6 +47,7 @@ const Archive = () => {
                         : "opacity-100",
                       "group-hover:scale-105"
                     )}
+                    containerClassName="absolute inset-0"
                     blurDataURL={getBlurPlaceholder(project.thumbnail)}
                   />
                 </div>

@@ -15,11 +15,12 @@ const About = () => {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24">
             {/* Portrait */}
             <div className="relative">
-              <div className="aspect-[3/4] overflow-hidden sticky top-24">
+              <div className="relative aspect-[3/4] overflow-hidden sticky top-24">
                 <OptimizedImage
                   src={about.portrait}
                   alt={siteConfig.name}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  containerClassName="absolute inset-0"
                   blurDataURL={getBlurPlaceholder(about.portrait)}
                 />
               </div>

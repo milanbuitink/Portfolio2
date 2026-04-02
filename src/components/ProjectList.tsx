@@ -4,10 +4,9 @@ import { projects, getHoverPosition } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Observer } from "gsap/all";
 
-gsap.registerPlugin(ScrollTrigger, Observer);
+gsap.registerPlugin(Observer);
 
 // ─── Mobile: GSAP Observer-driven fullscreen vertical swipe ───────────────
 const MobileSwipePortfolio = () => {
@@ -195,182 +194,86 @@ const MobileSwipePortfolio = () => {
   );
 };
 
-// ─── Desktop: ScrollTrigger snap sections ─────────────────────────────────
-const DesktopScrollPortfolio = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const panelsRef = useRef<HTMLDivElement[]>([]);
+// ─── Desktop: originele hover-titel lijst ─────────────────────────────────
+const DesktopHoverList = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
 
-  const addPanel = useCallback((el: HTMLDivElement | null) => {
-    if (el && !panelsRef.current.includes(el)) {
-      panelsRef.current.push(el);
-    }
-  }, []);
-
-  // Haal hover-positie op uit de configuratie-tabel in projects.ts
   const getPreviewPosition = (projectId: string) => {
     const pos = getHoverPosition(projectId);
     return { left: pos.x, top: pos.y, imgWidth: pos.size };
   };
 
-  useLayoutEffect(() => {
-    const panels = panelsRef.current;
-    if (panels.length === 0) return;
-
-    const ctx = gsap.context(() => {
-      // Each panel gets its own ScrollTrigger with snap
-      panels.forEach((panel) => {
-        const img = panel.querySelector<HTMLElement>(".panel-img");
-        const title = panel.querySelector<HTMLElement>(".panel-title");
-
-        // Image reveal: vertical clip-path mask
-        if (img) {
-          gsap.fromTo(
-            img,
-            { clipPath: "inset(100% 0% 0% 0%)" },
-            {
-              clipPath: "inset(0% 0% 0% 0%)",
-              duration: 1,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: panel,
-                start: "top 80%",
-                end: "top 20%",
-                scrub: 0.6,
-              },
-            }
-          );
-        }
-
-        // Title: fade + slide up after image starts revealing
-        if (title) {
-          gsap.fromTo(
-            title,
-            { opacity: 0, y: 50 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: panel,
-                start: "top 50%",
-                toggleActions: "play none none reverse",
-              },
-            }
-          );
-        }
-      });
-
-      // Snap scrolling
-      ScrollTrigger.create({
-        snap: {
-          snapTo: 1 / (panels.length - 1),
-          duration: { min: 0.3, max: 0.6 },
-          ease: "power1.inOut",
-        },
-      });
-    }, containerRef);
-
-    return () => {
-      ctx.revert();
-      panelsRef.current = [];
-    };
-  }, []);
-
   return (
-    <div ref={containerRef}>
+    <div className="relative min-h-screen flex items-center justify-center px-6 md:px-8">
+      {/* Hover preview afbeeldingen op vaste posities */}
       {projects.map((project) => {
         const pos = getPreviewPosition(project.id);
         return (
-          <section
-            key={project.id}
-            ref={addPanel}
-            className="relative h-screen flex items-center justify-center overflow-hidden"
+          <div
+            key={`image-${project.id}`}
+            className={cn(
+              "fixed pointer-events-none z-0 transition-opacity duration-300 ease-out",
+              hoveredProject === project.id ? "opacity-100" : "opacity-0"
+            )}
+            style={{
+              left: pos.left,
+              top: pos.top,
+              transform: "translate(-50%, -50%)",
+              width: pos.imgWidth,
+              height: "auto",
+              overflow: "visible",
+            }}
           >
-            {/* Background image with clip-path reveal */}
-            <div
-              className="panel-img absolute inset-0 will-change-[clip-path]"
+            <img
+              src={project.thumbnail}
+              alt={project.title}
+              loading="lazy"
+              decoding="async"
               style={{
-                left: pos.left,
-                top: pos.top,
-                transform: "translate(-50%, -50%)",
-                width: pos.imgWidth,
+                width: "100%",
                 height: "auto",
-                overflow: "visible",
+                maxWidth: "none",
+                maxHeight: "none",
+                display: "block",
               }}
-            >
-              <img
-                src={project.thumbnail}
-                alt={project.title}
-                loading="lazy"
-                decoding="async"
-                className="block w-full h-auto"
-                style={{
-                  maxWidth: "none",
-                  maxHeight: "none",
-                  willChange: "transform",
-                }}
-              />
-            </div>
-
-            {/* Hover preview (same as before, shown on title hover) */}
-            <div
-              className={cn(
-                "fixed pointer-events-none z-0 transition-opacity duration-300 ease-out",
-                hoveredProject === project.id ? "opacity-100" : "opacity-0"
-              )}
-              style={{
-                left: pos.left,
-                top: pos.top,
-                transform: "translate(-50%, -50%)",
-                width: pos.imgWidth,
-                height: "auto",
-                overflow: "visible",
-              }}
-            >
-              <img
-                src={project.thumbnail}
-                alt={project.title}
-                loading="lazy"
-                decoding="async"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxWidth: "none",
-                  maxHeight: "none",
-                  display: "block",
-                }}
-                className="object-cover"
-              />
-            </div>
-
-            {/* Title overlay */}
-            <div className="panel-title relative z-20 text-center will-change-[transform,opacity]">
-              <Link
-                to={`/project/${project.slug}`}
-                className="block group"
-                onMouseEnter={() => setHoveredProject(project.id)}
-                onMouseLeave={() => setHoveredProject(null)}
-              >
-                <span
-                  className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight transition-all duration-300 group-hover:tracking-wider"
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    opacity: hoveredProject
-                      ? hoveredProject === project.id
-                        ? 1
-                        : 0.2
-                      : 1,
-                  }}
-                >
-                  {project.title}
-                </span>
-              </Link>
-            </div>
-          </section>
+              className="object-cover"
+            />
+          </div>
         );
       })}
+
+      {/* Titellijst */}
+      <nav className="relative z-20 text-center py-32">
+        <ul className="space-y-2 md:space-y-3">
+          {projects.map((project, index) => {
+            const opacity = 1 - (index / (projects.length - 1)) * 0.5;
+            return (
+              <li key={project.id}>
+                <Link
+                  to={`/project/${project.slug}`}
+                  className="block group"
+                  onMouseEnter={() => setHoveredProject(project.id)}
+                  onMouseLeave={() => setHoveredProject(null)}
+                >
+                  <span
+                    className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight transition-all duration-300 group-hover:tracking-wider"
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      opacity: hoveredProject
+                        ? hoveredProject === project.id
+                          ? 1
+                          : 0.2
+                        : opacity,
+                    }}
+                  >
+                    {project.title}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </div>
   );
 };
@@ -383,7 +286,7 @@ const ProjectList = () => {
     return <MobileSwipePortfolio />;
   }
 
-  return <DesktopScrollPortfolio />;
+  return <DesktopHoverList />;
 };
 
 export default ProjectList;
