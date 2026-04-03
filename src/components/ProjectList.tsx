@@ -174,9 +174,6 @@ const MobileSwipePortfolio = () => {
               >
                 {project.title}
               </h3>
-              <p className="text-sm text-muted-foreground mt-1 font-light tracking-wide">
-                {project.year} · {project.category}
-              </p>
             </Link>
           </div>
 

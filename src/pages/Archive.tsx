@@ -13,7 +13,7 @@ const Archive = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-24 pb-32 px-6 md:px-8">
+      <main className="pb-32 px-6 md:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-12 md:mb-16">
@@ -54,12 +54,12 @@ const Archive = () => {
 
                 {/* Info */}
                 <div className="mt-3">
-                  <h3 className="text-lg font-medium">{project.title}</h3>
-                  <div className="flex gap-2 text-sm text-muted-foreground">
-                    <span>{project.year}</span>
-                    <span>•</span>
-                    <span>{project.category}</span>
-                  </div>
+                  <h3
+                    className="text-lg font-medium"
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  >
+                    {project.title}
+                  </h3>
                 </div>
               </Link>
             ))}

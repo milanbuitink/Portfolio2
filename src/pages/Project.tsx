@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { getProjectBySlug, getAdjacentProjects } from "@/data/projects";
 import Header from "@/components/Header";
 import OptimizedImage from "@/components/OptimizedImage";
+import ImageCarousel from "@/components/ImageCarousel";
 import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,7 +12,7 @@ const Project = () => {
   const navigate = useNavigate();
   const project = slug ? getProjectBySlug(slug) : undefined;
   const { prev, next } = slug ? getAdjacentProjects(slug) : { prev: null, next: null };
-  const [zoomImage, setZoomImage] = useState<{ src: string; alt: string } | null>(null);
+  const [zoomImage, setZoomImage] = useState<{ src: string | string[]; alt: string; } | null>(null);
   const [zoomScale, setZoomScale] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -21,7 +22,7 @@ const Project = () => {
 
   const isDesktopViewport = () => window.matchMedia("(min-width: 768px)").matches;
 
-  const openZoom = (src: string, alt: string) => {
+  const openZoom = (src: string | string[], alt: string) => {
     if (!isDesktopViewport()) return;
     setZoomImage({ src, alt });
     setZoomScale(1);
@@ -141,23 +142,33 @@ const Project = () => {
     );
   }
 
+  const heroImage = project.images[0];
+  const heroSrc = heroImage
+    ? (Array.isArray(heroImage.src) ? (heroImage.src[0] ?? project.thumbnail) : heroImage.src)
+    : project.thumbnail;
+  const heroZoomable = Boolean(heroImage && heroImage.zoomable && !Array.isArray(heroImage.src));
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-24 pb-32">
+      <main className="pb-32">
         {/* Hero Image */}
         <section className="w-full px-4 md:px-8 lg:px-16 mb-12 md:mb-16">
           <div
-            className="project-image-frame relative aspect-[16/9] md:aspect-[21/9] overflow-hidden cursor-pointer"
-            onClick={() => openZoom(project.images[0]?.src || project.thumbnail, project.title)}
+            className={`project-image-frame relative aspect-[16/9] md:aspect-[21/9] overflow-hidden ${heroZoomable ? "cursor-pointer" : ""}`}
+            onClick={
+              heroZoomable
+                ? () => openZoom(heroSrc, project.title)
+                : undefined
+            }
           >
             <OptimizedImage
-              src={project.images[0]?.src || project.thumbnail}
+              src={heroSrc}
               alt={project.title}
               className="project-image-quality w-full h-full object-cover"
               containerClassName="absolute inset-0"
-              blurDataURL={getBlurPlaceholder(project.images[0]?.src || project.thumbnail)}
+              blurDataURL={getBlurPlaceholder(heroSrc)}
               priority={true}
             />
           </div>
@@ -167,39 +178,84 @@ const Project = () => {
         <section className="max-w-4xl mx-auto px-6 md:px-8 mb-16 md:mb-24">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16">
             <div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-4">
+              <h1
+                className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-4"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
                 {project.title}
               </h1>
-              <div className="flex gap-4 text-sm text-muted-foreground">
-                <span>{project.year}</span>
-                <span>•</span>
-                <span>{project.category}</span>
-              </div>
             </div>
             <div className="md:pt-4">
-              <p className="text-lg md:text-xl font-light leading-relaxed text-muted-foreground">
-                {project.description}
-              </p>
+              <div className="space-y-2 text-lg md:text-xl font-light leading-relaxed text-muted-foreground">
+                <p>Jaar: {project.info.jaar || "—"}</p>
+                <p>Programma: {project.info.programma || "—"}</p>
+                <p>Locatie: {project.info.locatie || "—"}</p>
+                <p>Course: {project.info.course || "—"}</p>
+                <p>Studietijd: {project.info.studietijd || "—"}</p>
+                <p>Cijfer: {project.info.cijfer || "—"}</p>
+              </div>
             </div>
           </div>
         </section>
 
+        {/* Project Subtext */}
+        {project.subtext && project.subtext.length > 0 ? (
+          <section className="px-6 md:px-8 mb-16 md:mb-24">
+            <div className="w-full md:w-1/2 mx-auto">
+              <div className="space-y-6">
+                {project.subtext.map((paragraph, paragraphIndex) => (
+                  <p
+                    key={paragraphIndex}
+                    className="text-lg md:text-xl font-light leading-relaxed text-muted-foreground"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         {/* Image Gallery */}
         <section className="px-4 md:px-8 lg:px-16 space-y-4 md:space-y-8">
-          {project.images.slice(1).map((image, index) => (
-            <div
-              key={index}
-              className="project-image-frame relative w-full overflow-hidden cursor-pointer"
-              onClick={() => openZoom(image.src, image.alt)}
-            >
-              <OptimizedImage
-                src={image.src}
-                alt={image.alt}
-                className="project-image-quality w-full h-auto object-cover"
-                blurDataURL={getBlurPlaceholder(image.src)}
-              />
-            </div>
-          ))}
+          {project.images.slice(1).map((image, index) => {
+            const isZoomable = Boolean(image.zoomable && !Array.isArray(image.src));
+            const isCarousel = Array.isArray(image.src);
+            const frameClassName = `project-image-frame relative w-full ${isCarousel ? "" : "overflow-hidden"} ${isZoomable ? "cursor-pointer" : ""}`.trim();
+            const outerClassName = image.width === "half" ? "w-full md:w-1/2 md:mx-auto" : "w-full";
+
+            return (
+              <div key={index} className={outerClassName}>
+                <div
+                  className={frameClassName}
+                  onClick={isZoomable ? () => openZoom(image.src as string, image.alt) : undefined}
+                >
+                  {Array.isArray(image.src) ? (
+                    <ImageCarousel
+                      images={image.src.map((src, slideIndex) => ({
+                        src,
+                        alt: image.alt,
+                        caption: image.captions?.[slideIndex] ?? image.caption,
+                      }))}
+                    />
+                  ) : (
+                    <OptimizedImage
+                      src={image.src}
+                      alt={image.alt}
+                      className="project-image-quality w-full h-auto object-cover"
+                      blurDataURL={getBlurPlaceholder(image.src)}
+                    />
+                  )}
+                </div>
+
+                {image.caption && !Array.isArray(image.src) ? (
+                  <p className="mt-4 text-lg md:text-xl font-light leading-relaxed text-muted-foreground">
+                    {image.caption}
+                  </p>
+                ) : null}
+              </div>
+            );
+          })}
         </section>
 
         {/* Navigation */}
@@ -215,7 +271,12 @@ const Project = () => {
                   <span className="text-xs text-muted-foreground block mb-1">
                     Vorig project
                   </span>
-                  <span className="text-lg font-medium">{prev.title}</span>
+                  <span
+                    className="text-lg font-medium"
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  >
+                    {prev.title}
+                  </span>
                 </div>
               </button>
             ) : (
@@ -231,7 +292,12 @@ const Project = () => {
                   <span className="text-xs text-muted-foreground block mb-1">
                     Volgend project
                   </span>
-                  <span className="text-lg font-medium">{next.title}</span>
+                  <span
+                    className="text-lg font-medium"
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  >
+                    {next.title}
+                  </span>
                 </div>
                 <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
               </button>
@@ -262,28 +328,32 @@ const Project = () => {
               <X className="w-9 h-9" />
             </button>
 
-            <div
-              ref={zoomViewportRef}
-              className={`hide-scrollbar h-full w-full overflow-hidden flex items-center justify-center ${zoomScale > 1 ? (isPanning ? "cursor-grabbing" : "cursor-grab") : "cursor-default"}`}
-              onWheel={handleZoomWheel}
-              onMouseDown={handlePanStart}
-              onMouseMove={handlePanMove}
-              onMouseUp={handlePanEnd}
-              onMouseLeave={handlePanEnd}
-            >
-              <img
-                ref={zoomImageRef}
-                src={zoomImage.src}
-                alt={zoomImage.alt}
-                className="project-image-quality block max-w-full max-h-full w-auto h-auto object-contain select-none"
-                style={{
-                  transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
-                  transformOrigin: "center center",
-                  transition: isPanning ? "none" : "transform 120ms ease-out",
-                }}
-                draggable={false}
-              />
-            </div>
+            {Array.isArray(zoomImage.src) ? (
+              <ImageCarousel images={zoomImage.src.map(src => ({ src, alt: zoomImage.alt }))} className="h-full" />
+            ) : (
+              <div
+                ref={zoomViewportRef}
+                className={`hide-scrollbar h-full w-full overflow-hidden flex items-center justify-center ${zoomScale > 1 ? (isPanning ? "cursor-grabbing" : "cursor-grab") : "cursor-default"}`}
+                onWheel={handleZoomWheel}
+                onMouseDown={handlePanStart}
+                onMouseMove={handlePanMove}
+                onMouseUp={handlePanEnd}
+                onMouseLeave={handlePanEnd}
+              >
+                <img
+                  ref={zoomImageRef}
+                  src={zoomImage.src}
+                  alt={zoomImage.alt}
+                  className="project-image-quality block max-w-full max-h-full w-auto h-auto object-contain select-none"
+                  style={{
+                    transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                    transformOrigin: "center center",
+                    transition: isPanning ? "none" : "transform 120ms ease-out",
+                  }}
+                  draggable={false}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

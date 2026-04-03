@@ -83,6 +83,10 @@
     @apply border-border;
   }
 
+  img {
+    image-rendering: auto;
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -126,19 +130,12 @@
   }
 
   .project-image-quality {
-    image-rendering: smooth;
+    /* Prefer smooth interpolation (avoid crisp-edges/pixelated aliasing). */
+    image-rendering: auto;
     -ms-interpolation-mode: bicubic;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform: translateZ(0);
-    /* Forceer anti-aliasing voor alle browsers */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: optimizeQuality;
-    image-rendering: crisp-edges;
-    image-rendering: high-quality;
-    /* Safari/Chrome anti-aliasing */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   .hide-scrollbar {

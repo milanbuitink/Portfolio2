@@ -3,20 +3,41 @@
 // ===========================================
 
 export interface ProjectImage {
-  src: string;
+  src: string | string[];
   alt: string;
+  zoomable?: boolean;
+  caption?: string;
+  captions?: string[];
+  width?: "full" | "half";
+}
+
+export interface ProjectInfo {
+  jaar?: string;
+  programma?: string;
+  locatie?: string;
+  course?: string;
+  studietijd?: string;
+  cijfer?: string;
 }
 
 export interface Project {
   id: string;
   title: string;
   slug: string;
-  description: string;
-  year: string;
-  category: string;
+  description?: string;
+  year?: string;
+  category?: string;
+  subtext?: string[];
+  info: ProjectInfo;
   thumbnail: string;
   images: ProjectImage[];
 }
+
+// Helper: maak een image expliciet inzoombaar (opt-in)
+export const zoomable = (image: ProjectImage): ProjectImage => ({
+  ...image,
+  zoomable: true,
+});
 
 // ===========================================
 // JOUW PROJECTEN - Voeg hier je projecten toe
@@ -30,15 +51,34 @@ export const projects: Project[] = [
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2024",
     category: "Premaster",
+    subtext: [
+      "Tijdens het laatste vak van mijn premaster stond één opgave centraal: het ontwerpen van een poppodium dat niet op zichzelf staat, maar zich verweeft met een bestaande context. In dit geval de voormalige gistfabriek in Delft, een plek met een sterk industrieel karakter en een rijke geschiedenis. De uitdaging lag niet alleen in het creëren van nieuwe architectuur, maar juist in het aangaan van een dialoog met het bestaande.",
+      "Het project vroeg om een integrale benadering. Hoe laat je oud en nieuw samenwerken, zonder dat één van de twee zijn identiteit verliest? Hoe ontwerp je een gebouw dat bestand is tegen de intensiteit van harde muziek en grote bezoekersstromen, terwijl comfort en techniek op hoog niveau blijven functioneren? Denk hierbij aan bouwfysische vraagstukken zoals akoestiek, met box-in-box principes, en geavanceerde ventilatieconcepten voor een gezond binnenklimaat.",
+      "Binnen deze complexiteit heb ik mijn ontwerp benaderd vanuit drie heldere principes. Duurzaamheid speelde daarin een belangrijke rol. Door waar mogelijk te kiezen voor hout, zowel in constructie als in gevelafwerking, ontstaat een bewuste tegenstelling met de robuuste, industriële baksteen van de bestaande fabriek. Deze materialisatie versterkt de leesbaarheid van oud en nieuw, zonder de samenhang te verliezen.",
+    ],
+    info: {
+      jaar: "2024",
+      programma: "Poppodiumr",
+      locatie: "Delft",
+      course: "ON6, Premaster",
+      studietijd: "7 weken",
+      cijfer: "8.0",
+    },
     thumbnail: new URL('../../images/Timbertunes.webp', import.meta.url).href,
     images: [
       { src: new URL('../../images/Timbertunes.webp', import.meta.url).href, alt: "Stadsgezicht" },
-      { src: new URL('../../images/ttvisie.webp', import.meta.url).href, alt: "Visie" },
-      { src: new URL('../../images/ttbegane.webp', import.meta.url).href, alt:  "Begane grond" },
-      { src: new URL('../../images/tteerste.webp', import.meta.url).href, alt: "Eerste verdieping" },
-      { src: new URL('../../images/ttklimaat.webp', import.meta.url).href, alt: "Klimaat" },
-      { src: new URL('../../images/gevelfragment.webp', import.meta.url).href, alt: "Eerste verdieping" },
-      { src: new URL('../../images/details.webp', import.meta.url).href, alt: "Skyline" },
+      { src: new URL('../../images/ttvisie.png', import.meta.url).href, alt: "Visie", width: "half" },
+      { 
+        src: [
+          new URL('../../images/ttbegane.webp', import.meta.url).href,
+          new URL('../../images/tteerste.webp', import.meta.url).href,
+        ], 
+        alt: "Een carrousel van de begane grond en de eerste verdieping.",
+        captions: ["Begane grond", "1e verdieping"],
+      },
+      { src: new URL('../../images/ttklimaat.png', import.meta.url).href, alt: "Klimaat" },
+      { src: new URL('../../images/gevelfragment.png', import.meta.url).href, alt: "Eerste verdieping" },
+      zoomable({ src: new URL('../../images/details.png', import.meta.url).href, alt: "Skyline" }),
       { src: new URL('../../images/ttrenders.webp', import.meta.url).href, alt: "Architectuur" },
     ],
   },
@@ -48,6 +88,14 @@ export const projects: Project[] = [
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2025",
     category: "MSc 2",
+    info: {
+      jaar: "2025",
+      programma: "MSc 2",
+      locatie: "",
+      course: "",
+      studietijd: "",
+      cijfer: "",
+    },
     thumbnail: new URL('../../images/thesis.webp', import.meta.url).href,
     images: [
       { src: new URL('../../images/thesis.webp', import.meta.url).href, alt: "Thesis Turin" },
@@ -59,6 +107,14 @@ export const projects: Project[] = [
     description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
     year: "2024",
     category: "Portrait",
+    info: {
+      jaar: "2024",
+      programma: "Portrait",
+      locatie: "",
+      course: "",
+      studietijd: "",
+      cijfer: "",
+    },
     thumbnail: new URL('../../images/prototype.webp', import.meta.url).href,
     images: [
       { src: new URL('../../images/prototype.webp', import.meta.url).href, alt: "Portret 1" },
@@ -73,6 +129,14 @@ export const projects: Project[] = [
     description: "De kracht en sereniteit van de natuur, vastgelegd in zijn meest pure vorm.",
     year: "2023",
     category: "Nature",
+    info: {
+      jaar: "2023",
+      programma: "Nature",
+      locatie: "",
+      course: "",
+      studietijd: "",
+      cijfer: "",
+    },
     thumbnail: new URL('../../images/Sloterdijk.webp', import.meta.url).href,
     images: [
       { src: new URL('../../images/Sloterdijk.webp', import.meta.url).href, alt: "Waterval" },
@@ -87,6 +151,14 @@ export const projects: Project[] = [
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
     year: "2023",
     category: "Abstract",
+    info: {
+      jaar: "2023",
+      programma: "Abstract",
+      locatie: "",
+      course: "",
+      studietijd: "",
+      cijfer: "",
+    },
     thumbnail: new URL('../../images/graduation.webp', import.meta.url).href,
     images: [
       { src: new URL('../../images/graduation.webp', import.meta.url).href , alt: "Abstract 1" },
@@ -101,6 +173,14 @@ export const projects: Project[] = [
     description: "Momenten uit het dagelijks leven op straat, vol emotie en authenticiteit.",
     year: "2023",
     category: "Street",
+    info: {
+      jaar: "2023",
+      programma: "Street",
+      locatie: "",
+      course: "",
+      studietijd: "",
+      cijfer: "",
+    },
     thumbnail: new URL('../../images/10a.webp', import.meta.url).href,
     images: [
       { src: new URL('../../images/10a.webp', import.meta.url).href, alt: "Straat 1" },
@@ -115,6 +195,14 @@ export const projects: Project[] = [
     description: "Architecturale composities die de schoonheid van leegte en vorm benadrukken.",
     year: "2022",
     category: "Architecture",
+    info: {
+      jaar: "2022",
+      programma: "Architecture",
+      locatie: "",
+      course: "",
+      studietijd: "",
+      cijfer: "",
+    },
     thumbnail: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80",
     images: [
       { src: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&q=80", alt: "Ruimte 1" },

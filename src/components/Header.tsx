@@ -9,8 +9,8 @@ const Header = () => {
 
   return (
     <>
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 p-6 md:p-8">
+      {/* Header (scrolls with page) */}
+      <header className="relative z-50 p-6 md:p-8">
         <div className="flex items-start justify-between">
           {/* Menu Button - Links boven */}
           <button
@@ -38,14 +38,6 @@ const Header = () => {
           <div className="w-6 h-6" />
         </div>
       </header>
-
-      {/* Archive Link - Links onder */}
-      <Link
-        to="/archive"
-        className="fixed bottom-6 md:bottom-8 left-6 md:left-8 z-50 text-xs md:text-sm font-light tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
-      >
-        {siteConfig.navigation.archive}
-      </Link>
 
       {/* Fullscreen Menu Overlay */}
       <div
