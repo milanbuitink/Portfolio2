@@ -6,10 +6,12 @@ import OptimizedImage from "@/components/OptimizedImage";
 import ImageCarousel from "@/components/ImageCarousel";
 import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { useEffect, useRef, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Project = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const project = slug ? getProjectBySlug(slug) : undefined;
   const { prev, next } = slug ? getAdjacentProjects(slug) : { prev: null, next: null };
   const [zoomImage, setZoomImage] = useState<{ src: string | string[]; alt: string; } | null>(null);
@@ -186,7 +188,7 @@ const Project = () => {
               </h1>
             </div>
             <div className="md:pt-4">
-              <div className="space-y-2 text-lg md:text-xl font-light leading-relaxed text-muted-foreground">
+              <div className="space-y-2 text-[0.81rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground">
                 <p>Jaar: {project.info.jaar || "—"}</p>
                 <p>Programma: {project.info.programma || "—"}</p>
                 <p>Locatie: {project.info.locatie || "—"}</p>
@@ -206,7 +208,7 @@ const Project = () => {
                 {project.subtext.map((paragraph, paragraphIndex) => (
                   <p
                     key={paragraphIndex}
-                    className="text-lg md:text-xl font-light leading-relaxed text-muted-foreground"
+                    className="text-[0.81rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground"
                   >
                     {paragraph}
                   </p>
@@ -217,15 +219,82 @@ const Project = () => {
         ) : null}
 
         {/* Image Gallery */}
-        <section className="px-4 md:px-8 lg:px-16 space-y-4 md:space-y-8">
-          {project.images.slice(1).map((image, index) => {
+        <section className="px-4 md:px-8 lg:px-16 space-y-7 md:space-y-14">
+          {(() => {
+            const galleryImages = project.images.slice(1);
+
+            const galleryItems = galleryImages.flatMap((image, imageIndex) => {
+              if (isMobile && Array.isArray(image.src)) {
+                return image.src.map((src, slideIndex) => ({
+                  ...image,
+                  src,
+                  caption: image.captions?.[slideIndex] ?? image.caption,
+                  __key: `${imageIndex}-${slideIndex}`,
+                  __fromCarousel: true,
+                }));
+              }
+
+              return [
+                {
+                  ...image,
+                  __key: `${imageIndex}`,
+                  __fromCarousel: false,
+                },
+              ];
+            });
+
+            return galleryItems.map((image, index) => {
             const isZoomable = Boolean(image.zoomable && !Array.isArray(image.src));
             const isCarousel = Array.isArray(image.src);
             const frameClassName = `project-image-frame relative w-full ${isCarousel ? "" : "overflow-hidden"} ${isZoomable ? "cursor-pointer" : ""}`.trim();
-            const outerClassName = image.width === "half" ? "w-full md:w-1/2 md:mx-auto" : "w-full";
+            const firstSrc = Array.isArray(image.src) ? image.src[0] : image.src;
+            const isGevelfragment = typeof firstSrc === "string" && firstSrc.includes("gevelfragment");
+            const isKrachtschema = typeof firstSrc === "string" && firstSrc.includes("krachtschema");
+            const isKlimaatSchema = typeof firstSrc === "string" && (firstSrc.includes("ttklimaatz") || firstSrc.includes("ttklimaatw"));
+            const isBeganeEerste = typeof firstSrc === "string" && (firstSrc.includes("ttbegane") || firstSrc.includes("tteerste"));
+            const isDetails = typeof firstSrc === "string" && (firstSrc.includes("detail1") || firstSrc.includes("detail2") || firstSrc.includes("detail3"));
+            const isRenders = typeof firstSrc === "string" && (firstSrc.includes("render1") || firstSrc.includes("render2") || firstSrc.includes("render3") || firstSrc.includes("render4") || firstSrc.includes("render5"));
+
+            const prev = index > 0 ? galleryItems[index - 1] : undefined;
+            const prevFirstSrc = prev
+              ? (Array.isArray(prev.src) ? prev.src[0] : prev.src)
+              : undefined;
+            const prevIsKlimaatSchema = typeof prevFirstSrc === "string" && (prevFirstSrc.includes("ttklimaatz") || prevFirstSrc.includes("ttklimaatw"));
+            const prevIsDetails = typeof prevFirstSrc === "string" && (prevFirstSrc.includes("detail1") || prevFirstSrc.includes("detail2") || prevFirstSrc.includes("detail3"));
+
+            const extraTopSpaceClassName = (isGevelfragment && prevIsKlimaatSchema) || (isKrachtschema && prevIsDetails)
+              ? "pt-4 md:pt-8"
+              : "";
+
+            const isExpandedCarouselSlide = isMobile && (image as { __fromCarousel?: boolean }).__fromCarousel;
+
+            const shouldMobileZoomToFill =
+              isMobile &&
+              typeof firstSrc === "string" &&
+              (firstSrc.includes("ttbegane") || firstSrc.includes("tteerste") || firstSrc.includes("gevelfragment"));
+
+            const outerClassName = isExpandedCarouselSlide
+              ? "w-full"
+              : isGevelfragment
+                ? (isMobile ? "w-full" : "w-4/5 mx-auto")
+                : isKrachtschema
+                  ? "w-[85%] md:w-[45%] mx-auto"
+                  : isKlimaatSchema
+                    ? "w-[85%] mx-auto"
+                    : isBeganeEerste
+                      ? "w-[85%] mx-auto"
+                      : isDetails
+                        ? "w-[85%] mx-auto"
+                        : isRenders
+                          ? "w-[85%] mx-auto"
+                          : image.width === "half"
+                            ? "w-full md:w-1/2 md:mx-auto"
+                            : "w-full";
+
+            const wrapperClassName = `${outerClassName} ${extraTopSpaceClassName}`.trim();
 
             return (
-              <div key={index} className={outerClassName}>
+              <div key={(image as { __key?: string }).__key ?? index} className={wrapperClassName}>
                 <div
                   className={frameClassName}
                   onClick={isZoomable ? () => openZoom(image.src as string, image.alt) : undefined}
@@ -237,25 +306,57 @@ const Project = () => {
                         alt: image.alt,
                         caption: image.captions?.[slideIndex] ?? image.caption,
                       }))}
+                      showCaptions={!isRenders}
+                      tightFooter={isKlimaatSchema}
+                      arrowsOutside={isKlimaatSchema || isRenders}
+                      slideAspectClassName={isKlimaatSchema ? "aspect-[3/1]" : undefined}
                     />
                   ) : (
                     <OptimizedImage
                       src={image.src}
                       alt={image.alt}
-                      className="project-image-quality w-full h-auto object-cover"
+                      className={
+                        isExpandedCarouselSlide
+                          ? (
+                              shouldMobileZoomToFill
+                                ? "project-image-quality w-full h-auto object-contain origin-center scale-[1.35]"
+                                : "project-image-quality w-full h-auto object-contain"
+                            )
+                          : (
+                              shouldMobileZoomToFill
+                                ? "project-image-quality w-full h-auto object-cover origin-center scale-[1.15]"
+                                : "project-image-quality w-full h-auto object-cover"
+                            )
+                      }
                       blurDataURL={getBlurPlaceholder(image.src)}
                     />
                   )}
                 </div>
 
-                {image.caption && !Array.isArray(image.src) ? (
-                  <p className="mt-4 text-lg md:text-xl font-light leading-relaxed text-muted-foreground">
-                    {image.caption}
-                  </p>
-                ) : null}
+                {(() => {
+                  if (Array.isArray(image.src)) return null;
+
+                  if (isExpandedCarouselSlide) {
+                    if (isRenders) return null;
+                    if (!image.caption) return null;
+                    return (
+                      <p className="mt-2 text-center text-[0.81rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground">
+                        {image.caption}
+                      </p>
+                    );
+                  }
+
+                  if (!image.caption) return null;
+                  return (
+                    <p className="mt-4 text-[0.81rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground">
+                      {image.caption}
+                    </p>
+                  );
+                })()}
               </div>
             );
-          })}
+            });
+          })()}
         </section>
 
         {/* Navigation */}

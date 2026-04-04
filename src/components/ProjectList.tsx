@@ -49,7 +49,7 @@ const MobileSwipePortfolio = () => {
       if (i === 0) {
         // First section starts revealed
         gsap.set(img, { clipPath: "inset(0% 0% 0% 0%)" });
-        gsap.set(title, { opacity: 1, y: 0 });
+        gsap.set(title, { opacity: 1, y: 700 });
       } else {
         gsap.set(img, { clipPath: "inset(100% 0% 0% 0%)" });
         gsap.set(title, { opacity: 0, y: 40 });

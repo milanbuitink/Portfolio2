@@ -58,7 +58,7 @@ export const projects: Project[] = [
     ],
     info: {
       jaar: "2024",
-      programma: "Poppodiumr",
+      programma: "Poppodium",
       locatie: "Delft",
       course: "ON6, Premaster",
       studietijd: "7 weken",
@@ -70,16 +70,45 @@ export const projects: Project[] = [
       { src: new URL('../../images/ttvisie.png', import.meta.url).href, alt: "Visie", width: "half" },
       { 
         src: [
-          new URL('../../images/ttbegane.webp', import.meta.url).href,
-          new URL('../../images/tteerste.webp', import.meta.url).href,
+          new URL('../../images/ttbegane.png', import.meta.url).href,
+          new URL('../../images/tteerste.png', import.meta.url).href,
         ], 
         alt: "Een carrousel van de begane grond en de eerste verdieping.",
         captions: ["Begane grond", "1e verdieping"],
       },
-      { src: new URL('../../images/ttklimaat.png', import.meta.url).href, alt: "Klimaat" },
+      {
+        src: [
+          new URL('../../images/ttklimaatz.png', import.meta.url).href,
+          new URL('../../images/ttklimaatw.png', import.meta.url).href,
+        ],
+        alt: "Klimaat",
+        captions: ["Klimaat Zomer", "Klimaat Winter"],
+      },
       { src: new URL('../../images/gevelfragment.png', import.meta.url).href, alt: "Eerste verdieping" },
-      zoomable({ src: new URL('../../images/details.png', import.meta.url).href, alt: "Skyline" }),
-      { src: new URL('../../images/ttrenders.webp', import.meta.url).href, alt: "Architectuur" },
+      {
+        src: [
+          new URL('../../images/detail1.png', import.meta.url).href,
+          new URL('../../images/detail2.png', import.meta.url).href,
+          new URL('../../images/detail3.png', import.meta.url).href,
+        ],
+        alt: "Details",
+        captions: [""],
+      },
+       { src: new URL('../../images/krachtschema.jpg', import.meta.url).href, alt: "Architectuur" },
+      {
+        src: [
+          new URL('../../images/render1.webp', import.meta.url).href,
+          new URL('../../images/render2.webp', import.meta.url).href,
+          new URL('../../images/render3.webp', import.meta.url).href,
+          new URL('../../images/render4.webp', import.meta.url).href,
+          new URL('../../images/render5.webp', import.meta.url).href,
+          new URL('../../images/ttmodel.webp', import.meta.url).href,
+          new URL('../../images/qr.webp', import.meta.url).href,
+        ],
+        alt: "Renders",
+        captions: [],
+      },
+      
     ],
   },
   { id: "2",

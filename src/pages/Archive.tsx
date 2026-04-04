@@ -20,7 +20,7 @@ const Archive = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight">
               Archive
             </h1>
-            <p className="text-muted-foreground mt-4">
+            <p className="text-[0.72rem] text-muted-foreground mt-4">
               {projects.length} Projects
             </p>
           </div>

@@ -13,17 +13,17 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const IMAGES_DIR = path.join(__dirname, '..', 'images');
 const MAX_WIDTH = 1600;
-const MAX_FILE_SIZE = 600 * 1024; // 600KB
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // ~2MB
 const BLUR_WIDTH = 20; // tiny placeholder
 
 async function optimizeImage(filePath) {
   const ext = path.extname(filePath).toLowerCase();
-  if (ext !== '.png') return null;
+  if (ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg') return null;
 
   const baseName = path.basename(filePath, ext);
   const outputPath = path.join(IMAGES_DIR, `${baseName}.webp`);
 
-  console.log(`\nProcessing: ${baseName}.png`);
+  console.log(`\nProcessing: ${baseName}${ext}`);
 
   // Get original metadata (allow huge images)
   const metadata = await sharp(filePath, { limitInputPixels: false }).metadata();
@@ -36,7 +36,7 @@ async function optimizeImage(filePath) {
     resizeOptions = { width: MAX_WIDTH, withoutEnlargement: true };
   }
 
-  // Try progressively lower quality until under 600KB
+  // Try progressively lower quality until under MAX_FILE_SIZE
   let outputBuffer;
   while (quality >= 30) {
     outputBuffer = await sharp(filePath, { limitInputPixels: false })
@@ -45,7 +45,7 @@ async function optimizeImage(filePath) {
       .toBuffer();
 
     if (outputBuffer.length <= MAX_FILE_SIZE) break;
-    console.log(`  Quality ${quality}: ${(outputBuffer.length / 1024).toFixed(0)}KB > 600KB, reducing...`);
+    console.log(`  Quality ${quality}: ${(outputBuffer.length / 1024).toFixed(0)}KB > ${(MAX_FILE_SIZE / 1024).toFixed(0)}KB, reducing...`);
     quality -= 5;
   }
 
@@ -70,8 +70,11 @@ async function optimizeImage(filePath) {
 }
 
 async function main() {
-  const files = fs.readdirSync(IMAGES_DIR).filter(f => f.toLowerCase().endsWith('.png'));
-  console.log(`Found ${files.length} PNG files to optimize.\n`);
+  const files = fs.readdirSync(IMAGES_DIR).filter((file) => {
+    const lower = file.toLowerCase();
+    return lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg');
+  });
+  console.log(`Found ${files.length} image files to optimize.\n`);
 
   const results = [];
   for (const file of files) {
@@ -105,15 +108,15 @@ export const blurPlaceholders: Record<string, string> = ${JSON.stringify(placeho
   const totalSavings = ((1 - totalOptimized / totalOriginal) * 100).toFixed(1);
   console.log(`\n  TOTAL: ${(totalOriginal / 1024 / 1024).toFixed(2)}MB → ${(totalOptimized / 1024 / 1024).toFixed(2)}MB (${totalSavings}% saved)`);
 
-  // Check all under 600KB
+  // Check all under MAX_FILE_SIZE
   const overLimit = results.filter(r => r.optimizedSize > MAX_FILE_SIZE);
   if (overLimit.length > 0) {
-    console.log('\n⚠️  WARNING: These images exceed 600KB:');
+    console.log(`\n⚠️  WARNING: These images exceed ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(1)}MB:`);
     for (const r of overLimit) {
       console.log(`  ${r.name}: ${(r.optimizedSize / 1024).toFixed(0)}KB`);
     }
   } else {
-    console.log('\n✅ All images are under 600KB!');
+    console.log(`\n✅ All images are under ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(1)}MB!`);
   }
 }
 

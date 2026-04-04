@@ -33,8 +33,8 @@ const About = () => {
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-4">
                   {siteConfig.name}
                 </h1>
-                <p className="text-lg text-muted-foreground">{about.title}</p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-[0.81rem] text-muted-foreground">{about.title}</p>
+                <p className="text-[0.63rem] text-muted-foreground mt-1">
                   {about.location}
                 </p>
               </div>
@@ -74,7 +74,7 @@ const About = () => {
                   <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
                     Selected Clients
                   </h2>
-                  <p className="text-muted-foreground">
+                  <p className="text-[0.72rem] text-muted-foreground">
                     {about.clients.join(" · ")}
                   </p>
                 </div>
