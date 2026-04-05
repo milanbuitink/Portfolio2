@@ -49,7 +49,7 @@ const MobileSwipePortfolio = () => {
       if (i === 0) {
         // First section starts revealed
         gsap.set(img, { clipPath: "inset(0% 0% 0% 0%)" });
-        gsap.set(title, { opacity: 1, y: 700 });
+        gsap.set(title, { opacity: 1, y: 0 });
       } else {
         gsap.set(img, { clipPath: "inset(100% 0% 0% 0%)" });
         gsap.set(title, { opacity: 0, y: 40 });
@@ -145,6 +145,27 @@ const MobileSwipePortfolio = () => {
       className="fixed inset-0 w-full h-[100dvh] bg-white overflow-hidden"
       style={{ touchAction: "none", overscrollBehavior: "none" }}
     >
+      {/* Intro / entry screen (mobile only) */}
+      <div ref={addSection} className="absolute inset-0">
+        <div className="swipe-img absolute inset-0 bg-white" />
+
+        <div className="swipe-title absolute inset-0 z-10 px-8 text-center pointer-events-none flex items-center justify-center">
+          <div className="flex flex-col items-center gap-6">
+            <h2
+              className="text-sm font-light tracking-widest text-foreground"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            >
+              geselecteerde projecten {" "}
+            </h2>
+
+            <div className="flex items-center gap-2 text-muted-foreground motion-safe:animate-subtle-blink motion-reduce:animate-none">
+              <span className="text-xs font-light tracking-widest">swipe</span>
+              <span className="text-xs font-light tracking-widest">↑</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {projects.map((project, i) => (
         <div key={project.id} ref={addSection} className="absolute inset-0">
           {/* Image with clip-path mask for reveal animation */}
@@ -174,17 +195,16 @@ const MobileSwipePortfolio = () => {
               >
                 {project.title}
               </h3>
+              {(project.category || project.year) && (
+                <p
+                  className="mt-2 text-xs font-light tracking-widest text-muted-foreground"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  {project.category ?? project.year}
+                </p>
+              )}
             </Link>
           </div>
-
-          {/* Swipe hint on first slide */}
-          {i === 0 && (
-            <div className="absolute bottom-10 right-6 z-20 pointer-events-none">
-              <span className="text-white/50 text-xs tracking-widest font-light animate-bounce">
-                swipe ↑
-              </span>
-            </div>
-          )}
         </div>
       ))}
     </div>

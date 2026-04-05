@@ -149,6 +149,7 @@ const Project = () => {
     ? (Array.isArray(heroImage.src) ? (heroImage.src[0] ?? project.thumbnail) : heroImage.src)
     : project.thumbnail;
   const heroZoomable = Boolean(heroImage && heroImage.zoomable && !Array.isArray(heroImage.src));
+  const heroUsesContainFit = project.slug === "sloterdijk";
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,7 +169,7 @@ const Project = () => {
             <OptimizedImage
               src={heroSrc}
               alt={project.title}
-              className="project-image-quality w-full h-full object-cover"
+              className={`project-image-quality w-full h-full ${heroUsesContainFit ? "object-contain" : "object-cover"}`}
               containerClassName="absolute inset-0"
               blurDataURL={getBlurPlaceholder(heroSrc)}
               priority={true}
@@ -248,6 +249,17 @@ const Project = () => {
             const isCarousel = Array.isArray(image.src);
             const frameClassName = `project-image-frame relative w-full ${isCarousel ? "" : "overflow-hidden"} ${isZoomable ? "cursor-pointer" : ""}`.trim();
             const firstSrc = Array.isArray(image.src) ? image.src[0] : image.src;
+            const isSloterdijkFragment =
+              project.slug === "sloterdijk" &&
+              typeof firstSrc === "string" &&
+              firstSrc.includes("fragment");
+            const isSloterdijkKlimaat =
+              project.slug === "sloterdijk" &&
+              typeof firstSrc === "string" &&
+              firstSrc.includes("klimaat");
+            const isSloterdijkDiagram =
+              typeof firstSrc === "string" &&
+              (firstSrc.includes("dwellingtypes") || firstSrc.includes("principles"));
             const isGevelfragment = typeof firstSrc === "string" && firstSrc.includes("gevelfragment");
             const isKrachtschema = typeof firstSrc === "string" && firstSrc.includes("krachtschema");
             const isKlimaatSchema = typeof firstSrc === "string" && (firstSrc.includes("ttklimaatz") || firstSrc.includes("ttklimaatw"));
@@ -275,14 +287,20 @@ const Project = () => {
 
             const outerClassName = isExpandedCarouselSlide
               ? "w-full"
-              : isGevelfragment
+              : isSloterdijkFragment
+                ? "w-full md:w-1/2 md:mx-auto"
+                : isSloterdijkDiagram
+                  ? "w-full md:w-1/2 md:mx-auto"
+                  : isSloterdijkKlimaat
+                    ? "w-full md:w-1/2 md:mx-auto"
+                : isGevelfragment
                 ? (isMobile ? "w-full" : "w-4/5 mx-auto")
                 : isKrachtschema
                   ? "w-[85%] md:w-[45%] mx-auto"
                   : isKlimaatSchema
                     ? "w-[85%] mx-auto"
                     : isBeganeEerste
-                      ? "w-[85%] mx-auto"
+                      ? "w-full md:w-[85%] md:mx-auto"
                       : isDetails
                         ? "w-[85%] mx-auto"
                         : isRenders
@@ -300,17 +318,42 @@ const Project = () => {
                   onClick={isZoomable ? () => openZoom(image.src as string, image.alt) : undefined}
                 >
                   {Array.isArray(image.src) ? (
+                    (() => {
+                      const sloterdijkCarouselIsSmaller =
+                        project.slug === "sloterdijk" &&
+                        typeof firstSrc === "string" &&
+                        (
+                          firstSrc.includes("begane") ||
+                          firstSrc.includes("/25") ||
+                          firstSrc.includes("/68") ||
+                          firstSrc.includes("/911") ||
+                          firstSrc.includes("gallery") ||
+                          firstSrc.includes("corridor") ||
+                          firstSrc.includes("maisonette") ||
+                          firstSrc.includes("detail") ||
+                          firstSrc.includes("voor") ||
+                          firstSrc.includes("achter") ||
+                          firstSrc.includes("puntdak") ||
+                          firstSrc.includes("totaalmodel") ||
+                          firstSrc.includes("fragmentmodel")
+                        );
+                      const sloterdijkCarouselUsesOutsideArrows = project.slug === "sloterdijk";
+
+                      return (
                     <ImageCarousel
                       images={image.src.map((src, slideIndex) => ({
                         src,
                         alt: image.alt,
                         caption: image.captions?.[slideIndex] ?? image.caption,
                       }))}
+                      className={sloterdijkCarouselIsSmaller ? "md:w-[70%] md:mx-auto" : undefined}
                       showCaptions={!isRenders}
                       tightFooter={isKlimaatSchema}
-                      arrowsOutside={isKlimaatSchema || isRenders}
+                      arrowsOutside={sloterdijkCarouselUsesOutsideArrows || isKlimaatSchema || isRenders}
                       slideAspectClassName={isKlimaatSchema ? "aspect-[3/1]" : undefined}
                     />
+                      );
+                    })()
                   ) : (
                     <OptimizedImage
                       src={image.src}
@@ -319,12 +362,12 @@ const Project = () => {
                         isExpandedCarouselSlide
                           ? (
                               shouldMobileZoomToFill
-                                ? "project-image-quality w-full h-auto object-contain origin-center scale-[1.35]"
+                                ? "project-image-quality w-full h-auto object-contain origin-center scale-[1.6]"
                                 : "project-image-quality w-full h-auto object-contain"
                             )
                           : (
                               shouldMobileZoomToFill
-                                ? "project-image-quality w-full h-auto object-cover origin-center scale-[1.15]"
+                                ? "project-image-quality w-full h-auto object-cover origin-center scale-[1.25]"
                                 : "project-image-quality w-full h-auto object-cover"
                             )
                       }

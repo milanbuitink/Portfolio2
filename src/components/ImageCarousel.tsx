@@ -52,7 +52,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
   return (
     <div className={`w-full ${className ?? ""}`.trim()}>
-      <Carousel setApi={setApi} className="w-full" opts={{ loop: true }}>
+      <Carousel
+        setApi={setApi}
+        className={`w-full ${arrowsOutside ? "md:px-14" : ""}`.trim()}
+        opts={{ loop: true }}
+      >
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
@@ -72,7 +76,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
           variant="ghost"
           className={
             arrowsOutside
-              ? "absolute -left-8 md:-left-12 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
+              ? "absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
               : "absolute left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
           }
         />
@@ -80,7 +84,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
           variant="ghost"
           className={
             arrowsOutside
-              ? "absolute -right-8 md:-right-12 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
+              ? "absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
               : "absolute right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
           }
         />
