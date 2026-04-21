@@ -132,7 +132,7 @@ const MobileSwipePortfolio = () => {
     });
 
     return () => {
-      observer.kill();
+      observer?.kill();
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
       sectionsRef.current = [];
@@ -166,7 +166,16 @@ const MobileSwipePortfolio = () => {
         </div>
       </div>
 
-      {projects.map((project, i) => (
+      {projects.map((project, i) => {
+        const imageSrc = Array.isArray(project.images[0]?.src)
+          ? project.images[0]?.src[0]
+          : project.images[0]?.src;
+        const thumbnailSrc = Array.isArray(project.thumbnail)
+          ? project.thumbnail[0]
+          : project.thumbnail;
+        const displaySrc = imageSrc || thumbnailSrc || "";
+
+        return (
         <div key={project.id} ref={addSection} className="absolute inset-0">
           {/* Image with clip-path mask for reveal animation */}
           <div
@@ -174,7 +183,7 @@ const MobileSwipePortfolio = () => {
             onClick={() => navigate(`/project/${project.slug}`)}
           >
             <img
-              src={project.images[0]?.src || project.thumbnail}
+              src={displaySrc}
               alt={project.title}
               loading={i < 2 ? "eager" : "lazy"}
               decoding="async"
@@ -206,7 +215,8 @@ const MobileSwipePortfolio = () => {
             </Link>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

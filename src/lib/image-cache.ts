@@ -5,9 +5,15 @@ const preloadedImages = new Set<string>();
 const inFlightPreloads = new Map<string, Promise<void>>();
 const retainedImages = new Map<string, HTMLImageElement>();
 
-const normalizeUrl = (url: string) => url.trim();
+const normalizeUrl = (url: unknown): string => {
+  if (typeof url !== "string") {
+    return "";
+  }
 
-const preloadImage = (url: string): Promise<void> => {
+  return url.trim();
+};
+
+const preloadImage = (url: unknown): Promise<void> => {
   const normalizedUrl = normalizeUrl(url);
   if (!normalizedUrl) {
     return Promise.resolve();
@@ -56,19 +62,31 @@ const preloadImage = (url: string): Promise<void> => {
 const getAllSiteImageUrls = (): string[] => {
   const imageUrls = new Set<string>();
 
+  const addUrl = (value: unknown) => {
+    if (typeof value === "string") {
+      const normalized = normalizeUrl(value);
+      if (normalized) imageUrls.add(normalized);
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        addUrl(item);
+      }
+    }
+  };
+
   if (siteConfig.about.portrait) {
-    imageUrls.add(siteConfig.about.portrait);
+    addUrl(siteConfig.about.portrait);
   }
 
   for (const project of projects) {
     if (project.thumbnail) {
-      imageUrls.add(project.thumbnail);
+      addUrl(project.thumbnail);
     }
 
     for (const image of project.images) {
-      if (image.src) {
-        imageUrls.add(image.src);
-      }
+      addUrl(image.src);
     }
   }
 

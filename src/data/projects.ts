@@ -45,70 +45,28 @@ export const zoomable = (image: ProjectImage): ProjectImage => ({
 
 export const projects: Project[] = [
   {
-    id: "1",
-    title: "TIMBER TUNES",
-    slug: "Timber-tunes",
-    description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
+  id: "1",
+    title: "NIEUWE MOLENHOF",
+    slug: "portraits-of-silence",
+    description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
     year: "2024",
-    category: "Premaster",
-    subtext: [
-      "Tijdens het laatste vak van mijn premaster stond één opgave centraal: het ontwerpen van een poppodium dat niet op zichzelf staat, maar zich verweeft met een bestaande context. In dit geval de voormalige gistfabriek in Delft, een plek met een sterk industrieel karakter en een rijke geschiedenis. De uitdaging lag niet alleen in het creëren van nieuwe architectuur, maar juist in het aangaan van een dialoog met het bestaande.",
-      "Het project vroeg om een integrale benadering. Hoe laat je oud en nieuw samenwerken, zonder dat één van de twee zijn identiteit verliest? Hoe ontwerp je een gebouw dat bestand is tegen de intensiteit van harde muziek en grote bezoekersstromen, terwijl comfort en techniek op hoog niveau blijven functioneren? Denk hierbij aan bouwfysische vraagstukken zoals akoestiek, met box-in-box principes, en geavanceerde ventilatieconcepten voor een gezond binnenklimaat.",
-      "Binnen deze complexiteit heb ik mijn ontwerp benaderd vanuit drie heldere principes. Duurzaamheid speelde daarin een belangrijke rol. Door waar mogelijk te kiezen voor hout, zowel in constructie als in gevelafwerking, ontstaat een bewuste tegenstelling met de robuuste, industriële baksteen van de bestaande fabriek. Deze materialisatie versterkt de leesbaarheid van oud en nieuw, zonder de samenhang te verliezen.",
-    ],
+    category: "HBO Afstudeerproject",
     info: {
-      jaar: "2024",
-      programma: "Poppodium",
-      locatie: "Delft",
-      course: "ON6, Premaster",
-      studietijd: "7 weken",
-      cijfer: "8.0",
+      jaar: "2023",
+      programma: "Levensloopbestendig woongebouw",
+      locatie: "Elst",
+      course: "",
+      studietijd: "",
+      cijfer: "",
     },
-    thumbnail: new URL('../../images/timbertunes/Timbertunes.webp', import.meta.url).href,
+    thumbnail: new URL('../../images/prototype.webp', import.meta.url).href,
     images: [
-      { src: new URL('../../images/timbertunes/Timbertunes.webp', import.meta.url).href, alt: "Stadsgezicht" },
-      { src: new URL('../../images/timbertunes/ttvisie.png', import.meta.url).href, alt: "Visie", width: "half" },
-      { 
-        src: [
-          new URL('../../images/timbertunes/ttbegane.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/tteerste.webp', import.meta.url).href,
-        ], 
-        alt: "Een carrousel van de begane grond en de eerste verdieping.",
-        captions: ["Begane grond", "1e verdieping"],
-      },
-      {
-        src: [
-          new URL('../../images/timbertunes/ttklimaatz.png', import.meta.url).href,
-          new URL('../../images/timbertunes/ttklimaatw.png', import.meta.url).href,
-        ],
-        alt: "Klimaat",
-        captions: ["Zomer", "Winter"],
-      },
-      { src: new URL('../../images/timbertunes/gevelfragment.png', import.meta.url).href, alt: "Eerste verdieping" },
-      {
-        src: [
-          new URL('../../images/timbertunes/detail1.png', import.meta.url).href,
-          new URL('../../images/timbertunes/detail2.png', import.meta.url).href,
-          new URL('../../images/timbertunes/detail3.png', import.meta.url).href,
-        ],
-        alt: "Details",
-        captions: [""],
-      },
-       { src: new URL('../../images/timbertunes/krachtschema.jpg', import.meta.url).href, alt: "Architectuur" },
-      {
-        src: [
-          new URL('../../images/timbertunes/render1.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render2.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render3.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render4.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render5.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/ttmodel.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/qr.webp', import.meta.url).href,
-        ],
-        alt: "Renders",
-        captions: [],
-      },
-      
+      { src: new URL('../../images/prototype.webp', import.meta.url).href, alt: "Portret 1" },
+      zoomable({
+        src: new URL('../../images/molenhof/doorsnedes.png', import.meta.url).href,
+        alt: "Sloterdijk",
+        width: "half",
+      }),
     ],
   },
   { id: "2",
@@ -177,24 +135,69 @@ export const projects: Project[] = [
     ],
   },
   { id: "3",
-    title: "PUBLIC BUILDING",
-    slug: "portraits-of-silence",
-    description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
+    title: "TIMBER TUNES",
+    slug: "Timber-tunes",
+    description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2024",
-    category: "Portrait",
+    category: "Premaster",
+    subtext: [
+      "Tijdens het laatste vak van mijn premaster stond één opgave centraal: het ontwerpen van een poppodium dat niet op zichzelf staat, maar zich verweeft met een bestaande context. In dit geval de voormalige gistfabriek in Delft, een plek met een sterk industrieel karakter en een rijke geschiedenis. De uitdaging lag niet alleen in het creëren van nieuwe architectuur, maar juist in het aangaan van een dialoog met het bestaande.",
+      "Het project vroeg om een integrale benadering. Hoe laat je oud en nieuw samenwerken, zonder dat één van de twee zijn identiteit verliest? Hoe ontwerp je een gebouw dat bestand is tegen de intensiteit van harde muziek en grote bezoekersstromen, terwijl comfort en techniek op hoog niveau blijven functioneren? Denk hierbij aan bouwfysische vraagstukken zoals akoestiek, met box-in-box principes, en geavanceerde ventilatieconcepten voor een gezond binnenklimaat.",
+      "Binnen deze complexiteit heb ik mijn ontwerp benaderd vanuit drie heldere principes. Duurzaamheid speelde daarin een belangrijke rol. Door waar mogelijk te kiezen voor hout, zowel in constructie als in gevelafwerking, ontstaat een bewuste tegenstelling met de robuuste, industriële baksteen van de bestaande fabriek. Deze materialisatie versterkt de leesbaarheid van oud en nieuw, zonder de samenhang te verliezen.",
+    ],
     info: {
       jaar: "2024",
-      programma: "Portrait",
-      locatie: "",
-      course: "",
-      studietijd: "",
-      cijfer: "",
+      programma: "Poppodium",
+      locatie: "Delft",
+      course: "ON6, Premaster",
+      studietijd: "7 weken",
+      cijfer: "8.0",
     },
-    thumbnail: new URL('../../images/prototype.webp', import.meta.url).href,
+    thumbnail: new URL('../../images/timbertunes/Timbertunes.webp', import.meta.url).href,
     images: [
-      { src: new URL('../../images/prototype.webp', import.meta.url).href, alt: "Portret 1" },
-      { src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80", alt: "Portret 2" },
-      { src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&q=80", alt: "Portret 3" },
+      { src: new URL('../../images/timbertunes/Timbertunes.webp', import.meta.url).href, alt: "Stadsgezicht" },
+      { src: new URL('../../images/timbertunes/ttvisie.png', import.meta.url).href, alt: "Visie", width: "half" },
+      { 
+        src: [
+          new URL('../../images/timbertunes/ttbegane.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/tteerste.webp', import.meta.url).href,
+        ], 
+        alt: "Een carrousel van de begane grond en de eerste verdieping.",
+        captions: ["Begane grond", "1e verdieping"],
+      },
+      {
+        src: [
+          new URL('../../images/timbertunes/ttklimaatz.png', import.meta.url).href,
+          new URL('../../images/timbertunes/ttklimaatw.png', import.meta.url).href,
+        ],
+        alt: "Klimaat",
+        captions: ["Zomer", "Winter"],
+      },
+      { src: new URL('../../images/timbertunes/gevelfragment.png', import.meta.url).href, alt: "Eerste verdieping" },
+      {
+        src: [
+          new URL('../../images/timbertunes/detail1.png', import.meta.url).href,
+          new URL('../../images/timbertunes/detail2.png', import.meta.url).href,
+          new URL('../../images/timbertunes/detail3.png', import.meta.url).href,
+        ],
+        alt: "Details",
+        captions: [""],
+      },
+       { src: new URL('../../images/timbertunes/krachtschema.jpg', import.meta.url).href, alt: "Architectuur" },
+      {
+        src: [
+          new URL('../../images/timbertunes/render1.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/render2.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/render3.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/render4.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/render5.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/ttmodel.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/qr.webp', import.meta.url).href,
+        ],
+        alt: "Renders",
+        captions: [],
+      },
+      
     ],
   },
   {
@@ -302,10 +305,9 @@ export interface HoverPosition {
 
 export const projectHoverPositions: Record<string, HoverPosition> = {
   // Project ID :  { x (links/rechts), y (boven/onder), size (breedte) }
-  
-  "1": { x: "65%",  y: "54%",  size: "55vw" },   // TIMBER TUNES
+  "1": { x: "50%",  y: "45%",  size: "100vw" },   // PUBLIC BUILDING
   "2": { x: "40%",  y: "50%",  size: "70vw" },   // THESIS TURIN
-  "3": { x: "50%",  y: "45%",  size: "100vw" },   // PUBLIC BUILDING
+  "3": { x: "65%",  y: "54%",  size: "55vw" },   // TIMBER TUNES
   "4": { x: "55%",  y: "40%",  size: "70vw" },   // SLOTERDRIJK
   "5": { x: "45%",  y: "55%",  size: "40vw" },   // GRADUATION TUD
   "6": { x: "50%",  y: "45%",  size: "34vw" },   // VILLA 10A
