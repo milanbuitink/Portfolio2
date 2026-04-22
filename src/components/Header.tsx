@@ -1,11 +1,52 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, X } from "lucide-react";
 import { siteConfig } from "@/data/siteConfig";
 import { cn } from "@/lib/utils";
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+type HeaderProps = {
+  menuOpen?: boolean;
+  onMenuOpenChange?: (open: boolean) => void;
+};
+
+const Header = ({ menuOpen, onMenuOpenChange }: HeaderProps) => {
+  const isControlled = menuOpen !== undefined;
+  const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+  const isMenuOpen = useMemo(
+    () => (isControlled ? (menuOpen as boolean) : internalMenuOpen),
+    [isControlled, menuOpen, internalMenuOpen]
+  );
+
+  const setMenuOpen = (next: boolean) => {
+    if (!isControlled) setInternalMenuOpen(next);
+    onMenuOpenChange?.(next);
+  };
+
+  const [menuAnimReady, setMenuAnimReady] = useState(false);
+
+  useEffect(() => {
+    setMenuAnimReady(true);
+  }, []);
+
+  useEffect(() => {
+    const body = document.body;
+    const prevOverflow = body.style.overflow;
+    const prevPaddingRight = body.style.paddingRight;
+
+    if (isMenuOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      body.style.overflow = "hidden";
+      body.style.paddingRight = scrollbarWidth > 0 ? `${scrollbarWidth}px` : prevPaddingRight;
+    } else {
+      body.style.overflow = "unset";
+      body.style.paddingRight = prevPaddingRight;
+    }
+
+    return () => {
+      body.style.overflow = prevOverflow;
+      body.style.paddingRight = prevPaddingRight;
+    };
+  }, [isMenuOpen]);
 
   return (
     <>
@@ -14,7 +55,7 @@ const Header = () => {
         <div className="flex items-start justify-between">
           {/* Menu Button - Links boven */}
           <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => setMenuOpen(!isMenuOpen)}
             className="text-foreground hover:opacity-60 transition-opacity duration-300"
             aria-label={isMenuOpen ? "Sluit menu" : "Open menu"}
           >
@@ -28,7 +69,8 @@ const Header = () => {
           {/* Naam - Gecentreerd */}
           <Link
             to="/"
-            className="absolute left-1/2 -translate-x-1/2 text-sm md:text-base font-bold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            data-site-title
+            className="absolute left-1/2 -translate-x-1/2 block text-sm/none md:text-base/none font-bold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             {siteConfig.name}
@@ -42,31 +84,34 @@ const Header = () => {
       {/* Fullscreen Menu Overlay */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-background transition-all duration-500 ease-out flex items-center justify-center",
-          isMenuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+          "fixed inset-0 z-40 bg-background flex items-center justify-center transform-gpu transition-[opacity,transform] duration-700 ease-out",
+          isMenuOpen && menuAnimReady
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-2 pointer-events-none"
         )}
       >
-        <nav className="text-center space-y-8">
+        <nav
+          className="text-center space-y-3 md:space-y-4"
+          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        >
           <Link
             to="/"
-            onClick={() => setIsMenuOpen(false)}
-            className="block text-4xl md:text-6xl font-light tracking-wide hover:opacity-60 transition-opacity duration-300"
+            onClick={() => setMenuOpen(false)}
+            className="block text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
           >
             Work
           </Link>
           <Link
             to="/archive"
-            onClick={() => setIsMenuOpen(false)}
-            className="block text-4xl md:text-6xl font-light tracking-wide hover:opacity-60 transition-opacity duration-300"
+            onClick={() => setMenuOpen(false)}
+            className="block text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
           >
             Archive
           </Link>
           <Link
             to="/about"
-            onClick={() => setIsMenuOpen(false)}
-            className="block text-4xl md:text-6xl font-light tracking-wide hover:opacity-60 transition-opacity duration-300"
+            onClick={() => setMenuOpen(false)}
+            className="block text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
           >
             About
           </Link>

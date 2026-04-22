@@ -5,23 +5,23 @@ import "./HeroLoader.css";
 const LOADER_TITLE = "MILAN BUITINK";
 
 type HeroLoaderProps = {
+  onReveal?: () => void;
   onComplete: () => void;
 };
 
-const HeroLoader = ({ onComplete }: HeroLoaderProps) => {
+const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
   const copyRef = useRef<HTMLParagraphElement>(null);
-  const imageRefs = useRef<HTMLDivElement[]>([]);
 
   const images = useMemo(
     () => [
-      "/animation/files/img/img1.jpg",
-      "/animation/files/img/img2.jpg",
-      "/animation/files/img/img3.jpg",
-      "/animation/files/img/img4.jpg",
+      "/animation/files/img/sloterdijkaxo.webp",
+      "/animation/files/img/Timbertunes.webp",
+      "/animation/files/img/10a.webp",
+      "/animation/files/img/graduation.webp",
     ],
     [],
   );
@@ -38,27 +38,59 @@ const HeroLoader = ({ onComplete }: HeroLoaderProps) => {
       return;
     }
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // Still show the loader very briefly so the layout doesn't flash.
-      const timeout = globalThis.setTimeout(onComplete, 250);
-      return () => globalThis.clearTimeout(timeout);
-    }
+    const frames = Array.from(
+      rootEl.querySelectorAll<HTMLDivElement>(".hero-loader__image-frame"),
+    );
+    const frameImages = Array.from(
+      rootEl.querySelectorAll<HTMLImageElement>(".hero-loader__image-frame img"),
+    );
 
-    const frames = imageRefs.current.filter(Boolean);
-    const frameImages = frames
-      .map((frame) => frame.querySelector("img"))
-      .filter((img): img is HTMLImageElement => Boolean(img));
+    let revealed = false;
+    let completed = false;
 
-    if (frames.length === 0) {
+    const revealOnce = () => {
+      if (revealed) return;
+      revealed = true;
+      onReveal?.();
+    };
+
+    const completeOnce = () => {
+      if (completed) return;
+      completed = true;
       onComplete();
-      return;
-    }
+    };
 
     const ctx = gsap.context(() => {
       const timeline = gsap.timeline({
         defaults: { ease: "power3.out" },
-        onComplete,
       });
+
+      const nudgeTitleToHeader = () => {
+        const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
+        if (!headerTitleEl) return;
+
+        const headerRect = headerTitleEl.getBoundingClientRect();
+        const currentRect = titleEl.getBoundingClientRect();
+
+        if (currentRect.width <= 0 || currentRect.height <= 0) return;
+
+        const widthScaleFix = headerRect.width / currentRect.width;
+
+        if (Number.isFinite(widthScaleFix) && Math.abs(widthScaleFix - 1) > 0.001) {
+          const currentScale = Number(gsap.getProperty(titleEl, "scale")) || 1;
+          gsap.set(titleEl, { scale: currentScale * widthScaleFix });
+        }
+
+        const rectAfterScale = titleEl.getBoundingClientRect();
+        const dx = headerRect.left - rectAfterScale.left;
+        const dy = headerRect.top - rectAfterScale.top;
+
+        if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
+          const currentX = Number(gsap.getProperty(titleEl, "x")) || 0;
+          const currentY = Number(gsap.getProperty(titleEl, "y")) || 0;
+          gsap.set(titleEl, { x: currentX + dx, y: currentY + dy });
+        }
+      };
 
       gsap.set(progressEl, {
         scaleX: 0,
@@ -69,6 +101,30 @@ const HeroLoader = ({ onComplete }: HeroLoaderProps) => {
       });
       gsap.set(frameImages, { scale: 1.8 });
       gsap.set(copyEl, { autoAlpha: 0, y: 24 });
+      gsap.set(titleEl, {
+        x: 0,
+        y: 0,
+        scale: 1,
+        transformOrigin: "top left",
+        willChange: "transform",
+      });
+
+      const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
+      const titleRect = titleEl.getBoundingClientRect();
+      const headerRect = headerTitleEl?.getBoundingClientRect();
+
+      const canSnapToHeader =
+        Boolean(headerRect) &&
+        titleRect.width > 0 &&
+        titleRect.height > 0 &&
+        (headerRect?.width ?? 0) > 0 &&
+        (headerRect?.height ?? 0) > 0;
+
+      const snapX = canSnapToHeader ? (headerRect!.left - titleRect.left) : 0;
+      const snapY = canSnapToHeader ? (headerRect!.top - titleRect.top) : 0;
+      const snapScale = canSnapToHeader
+        ? headerRect!.width / titleRect.width
+        : 0.35;
 
       timeline
         .to(progressEl, {
@@ -119,32 +175,43 @@ const HeroLoader = ({ onComplete }: HeroLoaderProps) => {
           "+=0.6",
         )
         .to(titleEl, {
-          y: "2rem",
-          scale: 0.35,
+          x: snapX,
+          y: snapY,
+          scale: snapScale,
           duration: 1.3,
           ease: "power4.out",
+          onComplete: nudgeTitleToHeader,
         })
+        // As soon as the title has landed in its final spot,
+        // reveal the real header underneath for a seamless handoff.
+        .add(revealOnce)
+        .to(
+          titleEl,
+          {
+            autoAlpha: 0,
+            duration: 0.25,
+            ease: "power2.out",
+          },
+          "+=0.05",
+        )
         .to(
           panelEl,
           {
-            clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
-            duration: 1.2,
-            ease: "power4.inOut",
-          },
-          "-=0.6",
-        )
-        .to(
-          rootEl,
-          {
             autoAlpha: 0,
-            duration: 0.35,
+            duration: 0.55,
+            ease: "power2.out",
           },
-          "-=0.2",
-        );
+          "<",
+        )
+        .to(rootEl, {
+          autoAlpha: 0,
+          duration: 0.2,
+        })
+        .add(completeOnce);
     }, rootEl);
 
     return () => ctx.revert();
-  }, [onComplete]);
+  }, [onReveal, onComplete]);
 
   return (
     <div ref={rootRef} className="hero-loader" aria-hidden="true">
@@ -161,10 +228,6 @@ const HeroLoader = ({ onComplete }: HeroLoaderProps) => {
           {images.map((src, index) => (
             <div
               key={src}
-              ref={(el) => {
-                if (!el) return;
-                imageRefs.current[index] = el;
-              }}
               className="hero-loader__image-frame"
             >
               <img src={src} alt={`Loader visual ${index + 1}`} />

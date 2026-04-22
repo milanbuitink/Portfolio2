@@ -59,7 +59,7 @@ export const projects: Project[] = [
       studietijd: "",
       cijfer: "",
     },
-    thumbnail: new URL('../../images/prototype.webp', import.meta.url).href,
+    thumbnail: new URL('../../images/molenhof/axomolenhof.png', import.meta.url).href,
     images: [
       { src: new URL('../../images/prototype.webp', import.meta.url).href, alt: "Portret 1" },
       zoomable({
