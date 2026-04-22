@@ -70,15 +70,30 @@ async function optimizeImage(filePath) {
 }
 
 async function main() {
-  const files = fs.readdirSync(IMAGES_DIR).filter((file) => {
+  // Recursively find image files in IMAGES_DIR and subdirectories
+  function getFilesRecursive(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const files = [];
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        files.push(...getFilesRecursive(full));
+      } else {
+        files.push(full);
+      }
+    }
+    return files;
+  }
+
+  const allFiles = getFilesRecursive(IMAGES_DIR).filter((file) => {
     const lower = file.toLowerCase();
     return lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg');
   });
-  console.log(`Found ${files.length} image files to optimize.\n`);
+  console.log(`Found ${allFiles.length} image files to optimize.\n`);
 
   const results = [];
-  for (const file of files) {
-    const result = await optimizeImage(path.join(IMAGES_DIR, file));
+  for (const filePath of allFiles) {
+    const result = await optimizeImage(filePath);
     if (result) results.push(result);
   }
 

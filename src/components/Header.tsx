@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Plus, X } from "lucide-react";
 import { siteConfig } from "@/data/siteConfig";
 import { cn } from "@/lib/utils";
@@ -12,10 +12,16 @@ type HeaderProps = {
 const Header = ({ menuOpen, onMenuOpenChange }: HeaderProps) => {
   const isControlled = menuOpen !== undefined;
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHome = location.pathname === "/";
   const isMenuOpen = useMemo(
     () => (isControlled ? (menuOpen as boolean) : internalMenuOpen),
     [isControlled, menuOpen, internalMenuOpen]
   );
+
+  // Requirement: no top-left close (X) on the homepage.
+  // On home we only show the menu button when the menu is closed.
+  const showMenuButton = !isHome || !isMenuOpen;
 
   const setMenuOpen = (next: boolean) => {
     if (!isControlled) setInternalMenuOpen(next);
@@ -54,17 +60,21 @@ const Header = ({ menuOpen, onMenuOpenChange }: HeaderProps) => {
       <header className="relative z-50 p-6 md:p-8">
         <div className="flex items-start justify-between">
           {/* Menu Button - Links boven */}
-          <button
-            onClick={() => setMenuOpen(!isMenuOpen)}
-            className="text-foreground hover:opacity-60 transition-opacity duration-300"
-            aria-label={isMenuOpen ? "Sluit menu" : "Open menu"}
-          >
-            {isMenuOpen ? (
-              <X className="w-6 h-6" strokeWidth={1.5} />
-            ) : (
-              <Plus className="w-6 h-6" strokeWidth={1.5} />
-            )}
-          </button>
+          {showMenuButton ? (
+            <button
+              onClick={() => setMenuOpen(!isMenuOpen)}
+              className="text-foreground hover:opacity-60 transition-opacity duration-300"
+              aria-label={isMenuOpen ? "Sluit menu" : "Open menu"}
+            >
+              {isMenuOpen ? (
+                <X className="w-6 h-6" strokeWidth={1.5} />
+              ) : (
+                <Plus className="w-6 h-6" strokeWidth={1.5} />
+              )}
+            </button>
+          ) : (
+            <div className="w-6 h-6" aria-hidden="true" />
+          )}
 
           {/* Naam - Gecentreerd */}
           <Link

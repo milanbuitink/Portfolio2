@@ -60,157 +60,182 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
       onComplete();
     };
 
-    const ctx = gsap.context(() => {
-      const timeline = gsap.timeline({
-        defaults: { ease: "power3.out" },
-      });
+    let killed = false;
+    let ctx: gsap.Context | null = null;
 
-      const nudgeTitleToHeader = () => {
-        const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
-        if (!headerTitleEl) return;
+    const start = () => {
+      if (killed) return;
 
-        const headerRect = headerTitleEl.getBoundingClientRect();
-        const currentRect = titleEl.getBoundingClientRect();
+      ctx = gsap.context(() => {
+        const timeline = gsap.timeline({
+          defaults: { ease: "power3.out" },
+        });
 
-        if (currentRect.width <= 0 || currentRect.height <= 0) return;
+        const nudgeTitleToHeader = () => {
+          const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
+          if (!headerTitleEl) return;
 
-        const widthScaleFix = headerRect.width / currentRect.width;
+          const headerRect = headerTitleEl.getBoundingClientRect();
+          const currentRect = titleEl.getBoundingClientRect();
 
-        if (Number.isFinite(widthScaleFix) && Math.abs(widthScaleFix - 1) > 0.001) {
-          const currentScale = Number(gsap.getProperty(titleEl, "scale")) || 1;
-          gsap.set(titleEl, { scale: currentScale * widthScaleFix });
-        }
+          if (currentRect.width <= 0 || currentRect.height <= 0) return;
 
-        const rectAfterScale = titleEl.getBoundingClientRect();
-        const dx = headerRect.left - rectAfterScale.left;
-        const dy = headerRect.top - rectAfterScale.top;
+          const widthScaleFix = headerRect.width / currentRect.width;
 
-        if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
-          const currentX = Number(gsap.getProperty(titleEl, "x")) || 0;
-          const currentY = Number(gsap.getProperty(titleEl, "y")) || 0;
-          gsap.set(titleEl, { x: currentX + dx, y: currentY + dy });
-        }
-      };
+          if (
+            Number.isFinite(widthScaleFix) &&
+            Math.abs(widthScaleFix - 1) > 0.001
+          ) {
+            const currentScale = Number(gsap.getProperty(titleEl, "scale")) || 1;
+            gsap.set(titleEl, { scale: currentScale * widthScaleFix });
+          }
 
-      gsap.set(progressEl, {
-        scaleX: 0,
-        transformOrigin: "left center",
-      });
-      gsap.set(frames, {
-        clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)",
-      });
-      gsap.set(frameImages, { scale: 1.8 });
-      gsap.set(copyEl, { autoAlpha: 0, y: 24 });
-      gsap.set(titleEl, {
-        x: 0,
-        y: 0,
-        scale: 1,
-        transformOrigin: "top left",
-        willChange: "transform",
-      });
+          const rectAfterScale = titleEl.getBoundingClientRect();
+          const dx = headerRect.left - rectAfterScale.left;
+          const dy = headerRect.top - rectAfterScale.top;
 
-      const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
-      const titleRect = titleEl.getBoundingClientRect();
-      const headerRect = headerTitleEl?.getBoundingClientRect();
+          if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
+            const currentX = Number(gsap.getProperty(titleEl, "x")) || 0;
+            const currentY = Number(gsap.getProperty(titleEl, "y")) || 0;
+            gsap.set(titleEl, { x: currentX + dx, y: currentY + dy });
+          }
+        };
 
-      const canSnapToHeader =
-        Boolean(headerRect) &&
-        titleRect.width > 0 &&
-        titleRect.height > 0 &&
-        (headerRect?.width ?? 0) > 0 &&
-        (headerRect?.height ?? 0) > 0;
-
-      const snapX = canSnapToHeader ? (headerRect!.left - titleRect.left) : 0;
-      const snapY = canSnapToHeader ? (headerRect!.top - titleRect.top) : 0;
-      const snapScale = canSnapToHeader
-        ? headerRect!.width / titleRect.width
-        : 0.35;
-
-      timeline
-        .to(progressEl, {
-          scaleX: 1,
-          duration: 2.5,
-          ease: "power2.inOut",
-        })
-        .set(progressEl, { transformOrigin: "right center" })
-        .to(progressEl, {
+        gsap.set(progressEl, {
           scaleX: 0,
-          duration: 0.8,
-          ease: "power2.in",
-        })
-        .to(
-          frames,
-          {
-            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-            duration: 0.9,
-            stagger: 0.35,
-          },
-          "-=2.6",
-        )
-        .to(
-          frameImages,
-          {
-            scale: 1,
-            duration: 1.3,
-            stagger: 0.35,
-          },
-          "-=2.8",
-        )
-        .to(
-          copyEl,
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.8,
-          },
-          "-=1.8",
-        )
-        .to(
-          copyEl,
-          {
-            autoAlpha: 0,
-            y: -24,
-            duration: 0.8,
-          },
-          "+=0.6",
-        )
-        .to(titleEl, {
-          x: snapX,
-          y: snapY,
-          scale: snapScale,
-          duration: 1.3,
-          ease: "power4.out",
-          onComplete: nudgeTitleToHeader,
-        })
-        // As soon as the title has landed in its final spot,
-        // reveal the real header underneath for a seamless handoff.
-        .add(revealOnce)
-        .to(
-          titleEl,
-          {
-            autoAlpha: 0,
-            duration: 0.25,
-            ease: "power2.out",
-          },
-          "+=0.05",
-        )
-        .to(
-          panelEl,
-          {
-            autoAlpha: 0,
-            duration: 0.55,
-            ease: "power2.out",
-          },
-          "<",
-        )
-        .to(rootEl, {
-          autoAlpha: 0,
-          duration: 0.2,
-        })
-        .add(completeOnce);
-    }, rootEl);
+          transformOrigin: "left center",
+        });
+        gsap.set(frames, {
+          clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)",
+        });
+        gsap.set(frameImages, { scale: 1.8 });
+        gsap.set(copyEl, { autoAlpha: 0, y: 24 });
+        gsap.set(titleEl, {
+          x: 0,
+          y: 0,
+          scale: 1,
+          transformOrigin: "top left",
+          willChange: "transform",
+        });
 
-    return () => ctx.revert();
+        const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
+        const titleRect = titleEl.getBoundingClientRect();
+        const headerRect = headerTitleEl?.getBoundingClientRect();
+
+        const canSnapToHeader =
+          Boolean(headerRect) &&
+          titleRect.width > 0 &&
+          titleRect.height > 0 &&
+          (headerRect?.width ?? 0) > 0 &&
+          (headerRect?.height ?? 0) > 0;
+
+        const snapX = canSnapToHeader ? (headerRect!.left - titleRect.left) : 0;
+        const snapY = canSnapToHeader ? (headerRect!.top - titleRect.top) : 0;
+        const snapScale = canSnapToHeader ? headerRect!.width / titleRect.width : 0.35;
+
+        timeline
+          .to(progressEl, {
+            scaleX: 1,
+            duration: 2.5,
+            ease: "power2.inOut",
+          })
+          .set(progressEl, { transformOrigin: "right center" })
+          .to(progressEl, {
+            scaleX: 0,
+            duration: 0.8,
+            ease: "power2.in",
+          })
+          .to(
+            frames,
+            {
+              clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+              duration: 0.9,
+              stagger: 0.35,
+            },
+            "-=2.6",
+          )
+          .to(
+            frameImages,
+            {
+              scale: 1,
+              duration: 1.3,
+              stagger: 0.35,
+            },
+            "-=2.8",
+          )
+          .to(
+            copyEl,
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.8,
+            },
+            "-=1.8",
+          )
+          .to(
+            copyEl,
+            {
+              autoAlpha: 0,
+              y: -24,
+              duration: 0.8,
+            },
+            "+=0.6",
+          )
+          .to(titleEl, {
+            x: snapX,
+            y: snapY,
+            scale: snapScale,
+            duration: 1.3,
+            ease: "power4.out",
+            onComplete: nudgeTitleToHeader,
+          })
+          .add(revealOnce)
+          .to(
+            titleEl,
+            {
+              autoAlpha: 0,
+              duration: 0.25,
+              ease: "power2.out",
+            },
+            "+=0.05",
+          )
+          .to(
+            panelEl,
+            {
+              autoAlpha: 0,
+              duration: 0.55,
+              ease: "power2.out",
+            },
+            "<",
+          )
+          .to(rootEl, {
+            autoAlpha: 0,
+            duration: 0.2,
+          })
+          .add(completeOnce);
+      }, rootEl);
+    };
+
+    const fonts = (document as unknown as { fonts?: FontFaceSet }).fonts;
+    const fontTimeout = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, 800);
+    });
+
+    const fontReady = fonts?.load
+      ? fonts
+          .load("700 16px Montserrat")
+          .then(() => undefined)
+          .catch(() => undefined)
+      : fonts?.ready
+        ? fonts.ready.then(() => undefined).catch(() => undefined)
+        : Promise.resolve();
+
+    Promise.race([fontReady, fontTimeout]).then(() => start());
+
+    return () => {
+      killed = true;
+      ctx?.revert();
+    };
   }, [onReveal, onComplete]);
 
   return (

@@ -61,6 +61,27 @@ export const projects: Project[] = [
     },
     thumbnail: new URL('../../images/molenhof/axomolenhof.png', import.meta.url).href,
     images: [
+      {
+        src: [
+          new URL('../../images/molenhof/render1.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render2.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render3.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render4.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render5.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render6.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render7.webp', import.meta.url).href,
+        ],
+        alt: "Molenhof renders",
+        captions: [
+          "Render 1",
+          "Render 2",
+          "Render 3",
+          "Render 4",
+          "Render 5",
+          "Render 6",
+          "Render 7",
+        ],
+      },
       { src: new URL('../../images/prototype.webp', import.meta.url).href, alt: "Portret 1" },
       zoomable({
         src: new URL('../../images/molenhof/doorsnedes.png', import.meta.url).href,
