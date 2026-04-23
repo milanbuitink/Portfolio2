@@ -80,7 +80,7 @@ const Header = ({ menuOpen, onMenuOpenChange }: HeaderProps) => {
           <Link
             to="/"
             data-site-title
-            className="absolute left-1/2 -translate-x-1/2 block text-sm/none md:text-base/none font-bold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            className="absolute left-1/2 -translate-x-1/2 inline-block w-max max-w-none whitespace-nowrap leading-none text-[0.6rem] sm:text-[0.68rem] md:text-base font-bold tracking-[0.09em] sm:tracking-[0.11em] md:tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             {siteConfig.name}
@@ -101,27 +101,27 @@ const Header = ({ menuOpen, onMenuOpenChange }: HeaderProps) => {
         )}
       >
         <nav
-          className="text-center space-y-3 md:space-y-4"
+          className="text-center space-y-6 md:space-y-4"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           <Link
             to="/"
             onClick={() => setMenuOpen(false)}
-            className="block text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
           >
             Work
           </Link>
           <Link
             to="/archive"
             onClick={() => setMenuOpen(false)}
-            className="block text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
           >
             Archive
           </Link>
           <Link
             to="/about"
             onClick={() => setMenuOpen(false)}
-            className="block text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
           >
             About
           </Link>

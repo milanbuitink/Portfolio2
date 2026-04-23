@@ -225,7 +225,19 @@ const Project = () => {
             const galleryImages = project.images.slice(1);
 
             const galleryItems = galleryImages.flatMap((image, imageIndex) => {
-              if (isMobile && Array.isArray(image.src)) {
+              const firstImageSrc = Array.isArray(image.src) ? image.src[0] : image.src;
+              const isMolenhofRendersInData =
+                project.slug === "portraits-of-silence" &&
+                Array.isArray(image.src) &&
+                image.src.length === 7 &&
+                typeof firstImageSrc === "string" &&
+                firstImageSrc.includes("molenhof/render1");
+              const isMolenhofSequenceInData =
+                project.slug === "portraits-of-silence" &&
+                Array.isArray(image.src) &&
+                image.src.length === 17;
+
+              if (isMobile && Array.isArray(image.src) && !isMolenhofSequenceInData && !isMolenhofRendersInData) {
                 return image.src.map((src, slideIndex) => ({
                   ...image,
                   src,
@@ -264,6 +276,33 @@ const Project = () => {
             const isKrachtschema = typeof firstSrc === "string" && firstSrc.includes("krachtschema");
             const isKlimaatSchema = typeof firstSrc === "string" && (firstSrc.includes("ttklimaatz") || firstSrc.includes("ttklimaatw"));
             const isBeganeEerste = typeof firstSrc === "string" && (firstSrc.includes("ttbegane") || firstSrc.includes("tteerste"));
+            const isPublic123 =
+              project.slug === "natural-elements" &&
+              typeof firstSrc === "string" &&
+              (firstSrc.includes("public/1") || firstSrc.includes("/public/1") || firstSrc.includes("/1.webp") || firstSrc.includes("/1"));
+            const isPublicDefSection =
+              project.slug === "natural-elements" &&
+              typeof firstSrc === "string" &&
+              (firstSrc.includes("public/def1") || firstSrc.includes("public/def2") || firstSrc.includes("public/section") || firstSrc.includes("def1") || firstSrc.includes("def2") || firstSrc.includes("section"));
+            const isPublicDiagram =
+              project.slug === "natural-elements" &&
+              typeof firstSrc === "string" &&
+              (firstSrc.includes("public/diagram") || firstSrc.includes("/diagram") || firstSrc.includes("diagram"));
+            const isPublicPoster =
+              project.slug === "natural-elements" &&
+              typeof firstSrc === "string" &&
+              firstSrc.includes("public/poster");
+            const isMolenhofSequence =
+              project.slug === "portraits-of-silence" &&
+              Array.isArray(image.src) &&
+              image.src.length === 17;
+            const isMolenhofRenders =
+              project.slug === "portraits-of-silence" &&
+              Array.isArray(image.src) &&
+              image.src.length === 7 &&
+              typeof firstSrc === "string" &&
+              firstSrc.includes("molenhof/render1");
+            const isMolenhofSwipeCarousel = isMolenhofSequence || isMolenhofRenders;
             const isDetails = typeof firstSrc === "string" && (firstSrc.includes("detail1") || firstSrc.includes("detail2") || firstSrc.includes("detail3"));
             const isRenders = typeof firstSrc === "string" && (firstSrc.includes("render1") || firstSrc.includes("render2") || firstSrc.includes("render3") || firstSrc.includes("render4") || firstSrc.includes("render5"));
 
@@ -287,7 +326,15 @@ const Project = () => {
 
             const outerClassName = isExpandedCarouselSlide
               ? "w-full"
-              : isSloterdijkFragment
+              : isMolenhofSequence
+                ? "w-full md:w-[68%] md:mx-auto"
+              : isPublicPoster
+                ? "w-[85%] md:w-[30%] mx-auto"
+              : isPublic123 || isPublicDefSection
+                ? "w-full md:w-[75%] md:mx-auto"
+                : isPublicDiagram
+                  ? "w-full md:w-[56%] md:mx-auto"
+                  : isSloterdijkFragment
                 ? "w-full md:w-1/2 md:mx-auto"
                 : isSloterdijkDiagram
                   ? "w-full md:w-1/2 md:mx-auto"
@@ -351,6 +398,8 @@ const Project = () => {
                       tightFooter={isKlimaatSchema}
                       arrowsOutside={sloterdijkCarouselUsesOutsideArrows || isKlimaatSchema || isRenders}
                       slideAspectClassName={isKlimaatSchema ? "aspect-[3/1]" : undefined}
+                      hideArrowsOnMobile={isMolenhofSwipeCarousel}
+                      compactPagination={isMolenhofSwipeCarousel}
                     />
                       );
                     })()

@@ -18,10 +18,10 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
 
   const images = useMemo(
     () => [
-      "/animation/files/img/sloterdijkaxo.webp",
+      "/animation/files/img/axomolenhof.webp",
       "/animation/files/img/Timbertunes.webp",
-      "/animation/files/img/10a.webp",
-      "/animation/files/img/graduation.webp",
+      "/animation/files/img/graduationaxo.webp",
+      "/animation/files/img/sloterdijkaxo.webp",
     ],
     [],
   );
@@ -41,6 +41,7 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
     const frames = Array.from(
       rootEl.querySelectorAll<HTMLDivElement>(".hero-loader__image-frame"),
     );
+    const imagesEl = rootEl.querySelector<HTMLDivElement>(".hero-loader__images");
     const frameImages = Array.from(
       rootEl.querySelectorAll<HTMLImageElement>(".hero-loader__image-frame img"),
     );
@@ -72,6 +73,8 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
         });
 
         const nudgeTitleToHeader = () => {
+          if (window.matchMedia("(min-width: 901px)").matches) return;
+
           const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
           if (!headerTitleEl) return;
 
@@ -109,6 +112,7 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
           clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)",
         });
         gsap.set(frameImages, { scale: 1.8 });
+        gsap.set(imagesEl, { autoAlpha: 1 });
         gsap.set(copyEl, { autoAlpha: 0, y: 24 });
         gsap.set(titleEl, {
           x: 0,
@@ -189,6 +193,15 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
             ease: "power4.out",
             onComplete: nudgeTitleToHeader,
           })
+          .to(
+            imagesEl,
+            {
+              autoAlpha: 0,
+              duration: 1.1,
+              ease: "power2.inOut",
+            },
+            "<",
+          )
           .add(revealOnce)
           .to(
             titleEl,
@@ -261,8 +274,7 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
         </div>
 
         <p ref={copyRef} className="hero-loader__copy">
-          A visual storyteller focused on shaping timeless fashion narratives
-          through bold composition and refined tone.
+          Een verzameling van architectuur en bouwtechniek uit mijn studietijd.
         </p>
       </div>
     </div>

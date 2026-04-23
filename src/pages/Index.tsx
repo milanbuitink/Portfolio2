@@ -2,12 +2,22 @@ import Header from "@/components/Header";
 import ProjectList from "@/components/ProjectList";
 import HeroLoader from "@/components/HeroLoader";
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+
+let hasPlayedHomeLoader = false;
 
 const Index = () => {
-  const [isContentRevealed, setIsContentRevealed] = useState(false);
-  const [isLoaderComplete, setIsLoaderComplete] = useState(false);
+  const location = useLocation();
+  const shouldRunLoader = !hasPlayedHomeLoader;
+  const [isContentRevealed, setIsContentRevealed] = useState(!shouldRunLoader);
+  const [isLoaderComplete, setIsLoaderComplete] = useState(!shouldRunLoader);
   const [menuOpen, setMenuOpen] = useState(true);
-  const [canShowProjects, setCanShowProjects] = useState(false);
+  const [canShowProjects, setCanShowProjects] = useState(!shouldRunLoader);
+
+  // When returning to home from another page, ensure menu is open
+  useEffect(() => {
+    setMenuOpen(true);
+  }, [location.pathname]);
 
   useEffect(() => {
     return () => {
@@ -51,6 +61,7 @@ const Index = () => {
   }, []);
 
   const handleLoaderComplete = useCallback(() => {
+    hasPlayedHomeLoader = true;
     setIsLoaderComplete(true);
   }, []);
 
