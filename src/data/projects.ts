@@ -47,44 +47,28 @@ export const projects: Project[] = [
   {
   id: "1",
     title: "NIEUWE MOLENHOF",
-    slug: "portraits-of-silence",
+    slug: "nieuwe molenhof",
     description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
     year: "2024",
-    category: "HBO Afstudeerproject",
+    category: "Hbo Afstudeerproject",
+    subtext: [
+      "Voor mijn afstudeerproject aan de Hogeschool Windesheim heb ik samen met een studiegenoot gewerkt aan het ontwerp van een ouderencomplex. Dit project was opgezet als een schaduwopgave van het architectenbureau waar ik destijds stage liep. De hoofdarchitect van dit bureau begeleidde ons gedurende het proces, wat het project bijzonder leerzaam en praktijkgericht maakte. De centrale ambitie was het tegengaan van eenzaamheid onder ouderen, gecombineerd met een volledig emissieloos gebouw. Vanuit deze uitgangspunten ontwikkelden we de visie “samen oud worden”, waarin collectiviteit en duurzaamheid samenkomen.",
+      "Het ontwerp omvat 26 woningen van circa 60 m². Het project is ontwikkeld op basis van een PMC 7-eis (Product-Marktcombinatie), een methodiek waarbij een specifiek type woning wordt afgestemd op een duidelijke doelgroep en marktvraag. Dit zorgde voor een realistisch ontwerpkader, met concrete randvoorwaarden die richting gaven aan het proces. De woningen zijn opgebouwd uit prefab houten modules die per vrachtwagen vervoerd kunnen worden. Deze keuze draagt bij aan een efficiënter bouwproces en beperkt de uitstoot tijdens de realisatie.",
+      "In tegenstelling tot mijn ervaring aan de TU Delft lag binnen dit project de nadruk minder op het architectonisch concept als autonoom object, en juist meer op de technische en praktische uitwerking. Het ontwerp moest niet alleen ruimtelijk overtuigen, maar ook uitvoerbaar en bouwkundig consistent zijn. We hebben uiteindelijk een uitgebreide set tekeningen geproduceerd, bestaande uit circa twintig details, doorsneden, aanzichten en plattegronden. Alles is uitgewerkt op een niveau dat geschikt is voor een bouwaanvraag, wat ook een expliciete eis van de opdracht was.",
+    ],
     info: {
       jaar: "2023",
       programma: "Levensloopbestendig woongebouw",
       locatie: "Elst",
-      course: "",
-      studietijd: "",
-      cijfer: "",
+      course: "Hbo Afstudeerproject",
+      studietijd: "30 weken",
+      cijfer: "8,0",
     },
     thumbnail: new URL('../../images/molenhof/axomolenhof.webp', import.meta.url).href,
     images: [
       {
         src: new URL('../../images/molenhof/axomolenhof.webp', import.meta.url).href,
         alt: "Molenhof axonometrie",
-      },
-      {
-        src: [
-          new URL('../../images/molenhof/render1.webp', import.meta.url).href,
-          new URL('../../images/molenhof/render2.webp', import.meta.url).href,
-          new URL('../../images/molenhof/render3.webp', import.meta.url).href,
-          new URL('../../images/molenhof/render4.webp', import.meta.url).href,
-          new URL('../../images/molenhof/render5.webp', import.meta.url).href,
-          new URL('../../images/molenhof/render6.webp', import.meta.url).href,
-          new URL('../../images/molenhof/render7.webp', import.meta.url).href,
-        ],
-        alt: "Molenhof renders",
-        captions: [
-          "Render 1",
-          "Render 2",
-          "Render 3",
-          "Render 4",
-          "Render 5",
-          "Render 6",
-          "Render 7",
-        ],
       },
       {
         src: [
@@ -105,15 +89,73 @@ export const projects: Project[] = [
           new URL('../../images/molenhof/15.png', import.meta.url).href,
           new URL('../../images/molenhof/16.png', import.meta.url).href,
           new URL('../../images/molenhof/17.png', import.meta.url).href,
+          new URL('../../images/molenhof/18.png', import.meta.url).href,
         ],
         alt: "Molenhof beeldenreeks",
         captions: [],
       },
+{
+        src: [
+          new URL('../../images/molenhof/a1.png', import.meta.url).href,
+          new URL('../../images/molenhof/a2.png', import.meta.url).href,
+          new URL('../../images/molenhof/a3.png', import.meta.url).href,
+
+        ],
+        alt: "Molenhof beeldenreeks",
+        captions: [],
+      },
+      
       zoomable({
-        src: new URL('../../images/molenhof/doorsnedes.png', import.meta.url).href,
+        src: new URL('../../images/molenhof/begane.webp', import.meta.url).href,
         alt: "Sloterdijk",
         width: "half",
       }),
+
+      zoomable({
+        src: new URL('../../images/molenhof/eerste.webp', import.meta.url).href,
+        alt: "Sloterdijk",
+        width: "half",
+      }),
+      
+      zoomable({
+        src: new URL('../../images/molenhof/gevels.webp', import.meta.url).href,
+        alt: "Sloterdijk",
+        width: "half",
+
+      }),zoomable({
+        src: new URL('../../images/molenhof/doorsnedes.webp', import.meta.url).href,
+        alt: "Sloterdijk",
+        width: "half",
+      }),
+
+      zoomable({
+        src: new URL('../../images/molenhof/fragment1.webp', import.meta.url).href,
+        alt: "Sloterdijk",
+        width: "half",
+      }),
+
+      zoomable({
+        src: new URL('../../images/molenhof/fragment2.webp', import.meta.url).href,
+        alt: "Sloterdijk",
+        width: "half",
+      }),
+      
+      {
+        src: [
+          new URL('../../images/molenhof/render1.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render2.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render3.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render4.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render5.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render6.webp', import.meta.url).href,
+          new URL('../../images/molenhof/render7.webp', import.meta.url).href,
+        ],
+        alt: "Molenhof renders",
+        captions: [
+       
+        ],
+
+      },
     ],
  
   },
@@ -189,6 +231,11 @@ export const projects: Project[] = [
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2025",
     category: "MSc 1",
+    subtext: [
+      "",
+      "Het project vroeg om een integrale benadering. Hoe laat je oud en nieuw samenwerken, zonder dat één van de twee zijn identiteit verliest? Hoe ontwerp je een gebouw dat bestand is tegen de intensiteit van harde muziek en grote bezoekersstromen, terwijl comfort en techniek op hoog niveau blijven functioneren? Denk hierbij aan bouwfysische vraagstukken zoals akoestiek, met box-in-box principes, en geavanceerde ventilatieconcepten voor een gezond binnenklimaat.",
+      "Binnen deze complexiteit heb ik mijn ontwerp benaderd vanuit drie heldere principes. Duurzaamheid speelde daarin een belangrijke rol. Door waar mogelijk te kiezen voor hout, zowel in constructie als in gevelafwerking, ontstaat een bewuste tegenstelling met de robuuste, industriële baksteen van de bestaande fabriek. Deze materialisatie versterkt de leesbaarheid van oud en nieuw, zonder de samenhang te verliezen.",
+    ],
     info: {
       jaar: "2025",
       programma: "Woongebouw",
@@ -262,7 +309,7 @@ export const projects: Project[] = [
       studietijd: "8 weken",
       cijfer: "8,5",
     },
-    thumbnail: new URL('../../images/public/axopublic.webp', import.meta.url).href,
+    thumbnail: new URL('../../images/public/def1.webp', import.meta.url).href,
     images: [
           
       { src: new URL('../../images/public/axopublic.webp', import.meta.url).href, alt: "diagrams" },
@@ -303,8 +350,58 @@ export const projects: Project[] = [
   },
   {
     id: "5",
+    title: "THESIS VIA ROMA",
+    slug: "MSc4",
+    description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
+    year: "2023",
+    category: "Abstract",
+    info: {
+      jaar: "2023",
+      programma: "Abstract",
+      locatie: "",
+      course: "",
+      studietijd: "",
+      cijfer: "",
+    },
+    thumbnail: new URL('../../images/thesis/thesis.webp', import.meta.url).href,
+    images: [
+      { src: new URL('../../images/thesis/thesis.webp', import.meta.url).href , alt: "Abstract 1" },
+      {
+        src: [
+          new URL('../../images/thesis/1.png', import.meta.url).href,
+          new URL('../../images/thesis/2-3.png', import.meta.url).href,
+          new URL('../../images/thesis/4-5.png', import.meta.url).href,
+          new URL('../../images/thesis/6-7.png', import.meta.url).href,
+          new URL('../../images/thesis/8-9.png', import.meta.url).href,
+          new URL('../../images/thesis/10-11.png', import.meta.url).href,
+          new URL('../../images/thesis/12-13.png', import.meta.url).href,
+          new URL('../../images/thesis/14-15.png', import.meta.url).href,
+          new URL('../../images/thesis/16-17.png', import.meta.url).href,
+          new URL('../../images/thesis/18-19.png', import.meta.url).href,
+          new URL('../../images/thesis/20.png', import.meta.url).href,
+        ],
+        alt: "Thesis pagina's 1 t/m 20",
+        captions: [
+          "Pagina 1",
+          "Pagina 2-3",
+          "Pagina 4-5",
+          "Pagina 6-7",
+          "Pagina 8-9",
+          "Pagina 10-11",
+          "Pagina 12-13",
+          "Pagina 14-15",
+          "Pagina 16-17",
+          "Pagina 18-19",
+          "Pagina 20",
+        ],
+      },
+    ],
+  },
+
+  {
+    id: "6",
     title: "GRADUATION TUD",
-    slug: "abstract-forms",
+    slug: "MSc",
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
     year: "2023",
     category: "Abstract",
@@ -322,9 +419,10 @@ export const projects: Project[] = [
       { src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200&q=80", alt: "Abstract 2" },
       { src: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=1200&q=80", alt: "Abstract 3" },
     ],
+ 
   },
   {
-    id: "6",
+    id: "7",
     title: "VILLA 10A",
     slug: "street-stories",
     description: "Momenten uit het dagelijks leven op straat, vol emotie en authenticiteit.",
@@ -366,10 +464,10 @@ export const projectHoverPositions: Record<string, HoverPosition> = {
   "1": { x: "50%",  y: "50%",  size: "70vw" },   // PUBLIC BUILDING
   "2": { x: "50%",  y: "50%",  size: "60vw" },   // THESIS TURIN
   "3": { x: "50%",  y: "50%",  size: "65vw" },   // TIMBER TUNES
-  "4": { x: "50%",  y: "50%",  size: "90vw" },   // SLOTERDRIJK
-  "5": { x: "45%",  y: "55%",  size: "65vw" },   // GRADUATION TUD
-  "6": { x: "50%",  y: "45%",  size: "34vw" },   // VILLA 10A
-  "7": { x: "42%",  y: "48%",  size: "38vw" },   // GRADUATION TUD (2)
+  "4": { x: "50%",  y: "50%",  size: "60vw" },   // SLOTERDRIJK
+  "5": { x: "50%",  y: "50%",  size: "65vw" },   // GRADUATION TUD
+  "6": { x: "50%",  y: "50%",  size: "60vw" },   // VILLA 10A
+  "7": { x: "50%",  y: "50%",  size: "38vw" },   // GRADUATION TUD (2)
 };
 
 // Standaard positie als project niet in de tabel staat

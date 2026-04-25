@@ -8,35 +8,30 @@ import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const Project = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const project = slug ? getProjectBySlug(slug) : undefined;
-  const { prev, next } = slug ? getAdjacentProjects(slug) : { prev: null, next: null };
-  const [zoomImage, setZoomImage] = useState<{ src: string | string[]; alt: string; } | null>(null);
+type ZoomImageState = { src: string | string[]; alt: string };
+
+const computeSafeMaxZoom = (naturalWidth: number, naturalHeight: number) => {
+  const longestSide = Math.max(naturalWidth, naturalHeight);
+
+  if (longestSide >= 13000) return 2;
+  if (longestSide >= 9000) return 2.5;
+  return 4;
+};
+
+const DesktopZoomModal = ({
+  zoomImage,
+  onClose,
+}: {
+  zoomImage: ZoomImageState;
+  onClose: () => void;
+}) => {
   const [zoomScale, setZoomScale] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
+  const [maxZoomScale, setMaxZoomScale] = useState(4);
   const zoomViewportRef = useRef<HTMLDivElement | null>(null);
   const zoomImageRef = useRef<HTMLImageElement | null>(null);
   const panStartRef = useRef({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
-
-  const isDesktopViewport = () => window.matchMedia("(min-width: 768px)").matches;
-
-  const openZoom = (src: string | string[], alt: string) => {
-    if (!isDesktopViewport()) return;
-    setZoomImage({ src, alt });
-    setZoomScale(1);
-    setPanOffset({ x: 0, y: 0 });
-  };
-
-  const closeZoom = () => {
-    setZoomImage(null);
-    setZoomScale(1);
-    setPanOffset({ x: 0, y: 0 });
-    setIsPanning(false);
-  };
 
   const clampPan = (x: number, y: number, scale: number) => {
     const viewport = zoomViewportRef.current;
@@ -69,7 +64,7 @@ const Project = () => {
     event.preventDefault();
     const delta = event.deltaY;
     setZoomScale((currentScale) => {
-      const nextScale = Math.min(Math.max(delta < 0 ? currentScale + 0.12 : currentScale - 0.12, 1), 4);
+      const nextScale = Math.min(Math.max(delta < 0 ? currentScale + 0.12 : currentScale - 0.12, 1), maxZoomScale);
       setPanOffset((currentPan) => clampPan(currentPan.x, currentPan.y, nextScale));
       return nextScale;
     });
@@ -102,31 +97,124 @@ const Project = () => {
     setIsPanning(false);
   };
 
+  const handleZoomImageLoaded = () => {
+    const image = zoomImageRef.current;
+    if (!image || !image.naturalWidth || !image.naturalHeight) return;
+
+    const nextMax = computeSafeMaxZoom(image.naturalWidth, image.naturalHeight);
+    setMaxZoomScale(nextMax);
+    setZoomScale((currentScale) => Math.min(currentScale, nextMax));
+    setPanOffset((currentPan) => clampPan(currentPan.x, currentPan.y, Math.min(zoomScale, nextMax)));
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    const preventBrowserZoom = (event: WheelEvent) => {
+      if (event.ctrlKey) {
+        event.preventDefault();
+      }
+    };
+
+    const preventGestureZoom = (event: Event) => {
+      event.preventDefault();
+    };
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("wheel", preventBrowserZoom, { passive: false });
+    window.addEventListener("gesturestart", preventGestureZoom, { passive: false });
+    window.addEventListener("gesturechange", preventGestureZoom, { passive: false });
+    window.addEventListener("gestureend", preventGestureZoom, { passive: false });
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("wheel", preventBrowserZoom);
+      window.removeEventListener("gesturestart", preventGestureZoom);
+      window.removeEventListener("gesturechange", preventGestureZoom);
+      window.removeEventListener("gestureend", preventGestureZoom);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[120] hidden md:flex items-center justify-center bg-black/70 p-6" onClick={onClose}>
+      <div
+        className="relative w-full max-w-[1200px] h-[85vh] bg-transparent overflow-visible"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onClose();
+          }}
+          className="absolute -right-1 -top-16 z-20 p-0 m-0 bg-transparent border-none text-white hover:text-neutral-300 focus:outline-none"
+          style={{ boxShadow: "none" }}
+          aria-label="Sluiten"
+        >
+          <X className="w-9 h-9" />
+        </button>
+
+        {Array.isArray(zoomImage.src) ? (
+          <ImageCarousel images={zoomImage.src.map(src => ({ src, alt: zoomImage.alt }))} className="h-full" />
+        ) : (
+          <div
+            ref={zoomViewportRef}
+            className={`hide-scrollbar h-full w-full overflow-hidden flex items-center justify-center ${zoomScale > 1 ? (isPanning ? "cursor-grabbing" : "cursor-grab") : "cursor-default"}`}
+            onWheel={handleZoomWheel}
+            onMouseDown={handlePanStart}
+            onMouseMove={handlePanMove}
+            onMouseUp={handlePanEnd}
+            onMouseLeave={handlePanEnd}
+          >
+            <img
+              ref={zoomImageRef}
+              src={zoomImage.src}
+              alt={zoomImage.alt}
+              onLoad={handleZoomImageLoaded}
+              className="project-image-quality block max-w-full max-h-full w-auto h-auto object-contain select-none"
+              style={{
+                transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                transformOrigin: "center center",
+                transition: isPanning ? "none" : "transform 120ms ease-out",
+              }}
+              draggable={false}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Project = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const project = slug ? getProjectBySlug(slug) : undefined;
+  const { prev, next } = slug ? getAdjacentProjects(slug) : { prev: null, next: null };
+  const [zoomImage, setZoomImage] = useState<ZoomImageState | null>(null);
+
+  const isDesktopViewport = () => window.matchMedia("(min-width: 768px)").matches;
+
+  const openZoom = (src: string | string[], alt: string) => {
+    if (!isDesktopViewport()) return;
+    setZoomImage({ src, alt });
+  };
+
+  const closeZoom = () => {
+    setZoomImage(null);
+  };
+
   useEffect(() => {
     // Scroll naar top bij pagina wissel
     window.scrollTo(0, 0);
   }, [slug]);
-
-  useEffect(() => {
-    if (!zoomImage) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeZoom();
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [zoomImage]);
-
-  useEffect(() => {
-    if (!zoomImage) return;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [zoomImage]);
 
   if (!project) {
     return (
@@ -134,10 +222,10 @@ const Project = () => {
         <div className="text-center">
           <h1 className="text-2xl font-light mb-4">Project niet gevonden</h1>
           <Link
-            to="/"
+            to="/project"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
-            Terug naar home
+            Terug naar projecten
           </Link>
         </div>
       </div>
@@ -156,6 +244,17 @@ const Project = () => {
       <Header />
 
       <main className="pb-32">
+        <section className="max-w-6xl mx-auto px-6 md:px-8 mb-8">
+          <Link
+            to="/project"
+            className="inline-flex items-center gap-2 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+            Terug naar projecten
+          </Link>
+        </section>
+
         {/* Hero Image */}
         <section className="w-full px-4 md:px-8 lg:px-16 mb-12 md:mb-16">
           <div
@@ -233,9 +332,10 @@ const Project = () => {
                 typeof firstImageSrc === "string" &&
                 firstImageSrc.includes("molenhof/render1");
               const isMolenhofSequenceInData =
-                project.slug === "portraits-of-silence" &&
                 Array.isArray(image.src) &&
-                image.src.length === 17;
+                image.src.length >= 17 &&
+                typeof firstImageSrc === "string" &&
+                firstImageSrc.toLowerCase().includes("molenhof");
 
               if (isMobile && Array.isArray(image.src) && !isMolenhofSequenceInData && !isMolenhofRendersInData) {
                 return image.src.map((src, slideIndex) => ({
@@ -293,9 +393,10 @@ const Project = () => {
               typeof firstSrc === "string" &&
               firstSrc.includes("public/poster");
             const isMolenhofSequence =
-              project.slug === "portraits-of-silence" &&
               Array.isArray(image.src) &&
-              image.src.length === 17;
+              image.src.length >= 17 &&
+              typeof firstSrc === "string" &&
+              firstSrc.toLowerCase().includes("molenhof");
             const isMolenhofRenders =
               project.slug === "portraits-of-silence" &&
               Array.isArray(image.src) &&
@@ -327,7 +428,7 @@ const Project = () => {
             const outerClassName = isExpandedCarouselSlide
               ? "w-full"
               : isMolenhofSequence
-                ? "w-full md:w-[68%] md:mx-auto"
+                ? "w-full md:w-[70%] md:mx-auto"
               : isPublicPoster
                 ? "w-[85%] md:w-[30%] mx-auto"
               : isPublic123 || isPublicDefSection
@@ -385,6 +486,7 @@ const Project = () => {
                           firstSrc.includes("fragmentmodel")
                         );
                       const sloterdijkCarouselUsesOutsideArrows = project.slug === "sloterdijk";
+                      const thesisCarouselIsSmaller = project.slug === "MSc4";
 
                       return (
                     <ImageCarousel
@@ -393,13 +495,20 @@ const Project = () => {
                         alt: image.alt,
                         caption: image.captions?.[slideIndex] ?? image.caption,
                       }))}
-                      className={sloterdijkCarouselIsSmaller ? "md:w-[70%] md:mx-auto" : undefined}
-                      showCaptions={!isRenders}
+                      className={
+                        sloterdijkCarouselIsSmaller || thesisCarouselIsSmaller
+                          ? thesisCarouselIsSmaller
+                            ? "md:w-[85%] md:mx-auto"
+                            : "md:w-[70%] md:mx-auto"
+                          : undefined
+                      }
+                      showCaptions={thesisCarouselIsSmaller ? false : !isRenders}
                       tightFooter={isKlimaatSchema}
                       arrowsOutside={sloterdijkCarouselUsesOutsideArrows || isKlimaatSchema || isRenders}
                       slideAspectClassName={isKlimaatSchema ? "aspect-[3/1]" : undefined}
                       hideArrowsOnMobile={isMolenhofSwipeCarousel}
                       compactPagination={isMolenhofSwipeCarousel}
+                      hidePagination={thesisCarouselIsSmaller}
                     />
                       );
                     })()
@@ -502,54 +611,7 @@ const Project = () => {
       </main>
 
       {/* Desktop image zoom modal */}
-      {zoomImage && (
-        <div className="fixed inset-0 z-[120] hidden md:flex items-center justify-center bg-black/70 p-6" onClick={closeZoom}>
-          <div
-            className="relative w-full max-w-[1200px] h-[85vh] bg-transparent overflow-visible"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                closeZoom();
-              }}
-              className="absolute -right-1 -top-16 z-20 p-0 m-0 bg-transparent border-none text-white hover:text-neutral-300 focus:outline-none"
-              style={{ boxShadow: "none" }}
-              aria-label="Sluiten"
-            >
-              <X className="w-9 h-9" />
-            </button>
-
-            {Array.isArray(zoomImage.src) ? (
-              <ImageCarousel images={zoomImage.src.map(src => ({ src, alt: zoomImage.alt }))} className="h-full" />
-            ) : (
-              <div
-                ref={zoomViewportRef}
-                className={`hide-scrollbar h-full w-full overflow-hidden flex items-center justify-center ${zoomScale > 1 ? (isPanning ? "cursor-grabbing" : "cursor-grab") : "cursor-default"}`}
-                onWheel={handleZoomWheel}
-                onMouseDown={handlePanStart}
-                onMouseMove={handlePanMove}
-                onMouseUp={handlePanEnd}
-                onMouseLeave={handlePanEnd}
-              >
-                <img
-                  ref={zoomImageRef}
-                  src={zoomImage.src}
-                  alt={zoomImage.alt}
-                  className="project-image-quality block max-w-full max-h-full w-auto h-auto object-contain select-none"
-                  style={{
-                    transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
-                    transformOrigin: "center center",
-                    transition: isPanning ? "none" : "transform 120ms ease-out",
-                  }}
-                  draggable={false}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {zoomImage && <DesktopZoomModal zoomImage={zoomImage} onClose={closeZoom} />}
     </div>
   );
 };

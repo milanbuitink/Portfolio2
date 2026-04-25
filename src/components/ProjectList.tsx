@@ -180,7 +180,11 @@ const MobileSwipePortfolio = () => {
           {/* Image with clip-path mask for reveal animation */}
           <div
             className="swipe-img absolute inset-0 will-change-[clip-path]"
-            onClick={() => navigate(`/project/${project.slug}`)}
+            onClick={() =>
+              navigate(`/project/${project.slug}`, {
+                state: { fromProjectList: true },
+              })
+            }
           >
             <img
               src={displaySrc}
@@ -196,6 +200,7 @@ const MobileSwipePortfolio = () => {
           <div className="swipe-title absolute bottom-0 left-0 right-0 z-10 px-6 pb-24 pointer-events-none will-change-[transform,opacity]">
             <Link
               to={`/project/${project.slug}`}
+              state={{ fromProjectList: true }}
               className="pointer-events-auto"
             >
               <h3
@@ -278,6 +283,7 @@ const DesktopHoverList = () => {
               <li key={project.id}>
                 <Link
                   to={`/project/${project.slug}`}
+                  state={{ fromProjectList: true }}
                   className="block group"
                   onMouseEnter={() => setHoveredProject(project.id)}
                   onMouseLeave={() => setHoveredProject(null)}

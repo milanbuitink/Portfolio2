@@ -236,7 +236,7 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
 
     const fontReady = fonts?.load
       ? fonts
-          .load("700 16px Montserrat")
+          .load("500 16px Montserrat")
           .then(() => undefined)
           .catch(() => undefined)
       : fonts?.ready
@@ -279,6 +279,6 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
       </div>
     </div>
   );
-};
+}
 
 export default HeroLoader;

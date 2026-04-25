@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
+import Projects from "./pages/Projects";
 import Project from "./pages/Project";
 import About from "./pages/About";
 import Archive from "./pages/Archive";
@@ -26,6 +27,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/project" element={<Projects />} />
             <Route path="/project/:slug" element={<Project />} />
             <Route path="/about" element={<About />} />
             <Route path="/archive" element={<Archive />} />

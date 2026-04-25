@@ -55,9 +55,9 @@
   color: hsl(var(--foreground));
   text-align: center;
   text-transform: uppercase;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.08em;
   line-height: 1.35;
 }
