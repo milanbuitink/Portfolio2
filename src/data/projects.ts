@@ -99,6 +99,7 @@ export const projects: Project[] = [
           new URL('../../images/molenhof/a1.png', import.meta.url).href,
           new URL('../../images/molenhof/a2.png', import.meta.url).href,
           new URL('../../images/molenhof/a3.png', import.meta.url).href,
+          new URL('../../images/molenhof/a4.png', import.meta.url).href,
 
         ],
         alt: "Molenhof beeldenreeks",

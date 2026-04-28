@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
-import ProjectList from "@/components/ProjectList";
 import HeroLoader from "@/components/HeroLoader";
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -11,13 +11,6 @@ const Index = () => {
   const shouldRunLoader = !hasPlayedHomeLoader;
   const [isContentRevealed, setIsContentRevealed] = useState(!shouldRunLoader);
   const [isLoaderComplete, setIsLoaderComplete] = useState(!shouldRunLoader);
-  const [menuOpen, setMenuOpen] = useState(true);
-  const [canShowProjects, setCanShowProjects] = useState(!shouldRunLoader);
-
-  // When returning to home from another page, ensure menu is open
-  useEffect(() => {
-    setMenuOpen(true);
-  }, [location.pathname]);
 
   useEffect(() => {
     return () => {
@@ -42,19 +35,9 @@ const Index = () => {
       return;
     }
 
-    // On the project title list (Work) we still want scrolling,
-    // but without a visible scrollbar.
-    if (canShowProjects && !menuOpen) {
-      body.style.overflow = "unset";
-      html.style.overflow = "unset";
-      body.classList.add("hide-scrollbar");
-      html.classList.add("hide-scrollbar");
-      return;
-    }
-
     body.classList.remove("hide-scrollbar");
     html.classList.remove("hide-scrollbar");
-  }, [isLoaderComplete, canShowProjects, menuOpen]);
+  }, [isLoaderComplete]);
 
   const handleLoaderReveal = useCallback(() => {
     setIsContentRevealed(true);
@@ -63,11 +46,6 @@ const Index = () => {
   const handleLoaderComplete = useCallback(() => {
     hasPlayedHomeLoader = true;
     setIsLoaderComplete(true);
-  }, []);
-
-  const handleMenuOpenChange = useCallback((open: boolean) => {
-    setMenuOpen(open);
-    if (!open) setCanShowProjects(true);
   }, []);
 
   return (
@@ -84,11 +62,30 @@ const Index = () => {
         }
         aria-hidden={!isContentRevealed}
       >
-        <Header menuOpen={menuOpen} onMenuOpenChange={handleMenuOpenChange} />
+        <Header />
 
-        {isLoaderComplete && canShowProjects && !menuOpen && (
-          <main>
-            <ProjectList />
+        {isLoaderComplete && (
+          <main className="min-h-[calc(100vh-6rem)] flex items-center justify-center px-6 md:px-8 pb-16 md:pb-20">
+            <nav className="w-full max-w-3xl text-center space-y-6 md:space-y-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <Link
+                to="/project"
+                className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+              >
+                Work
+              </Link>
+              <Link
+                to="/archive"
+                className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+              >
+                Archive
+              </Link>
+              <Link
+                to="/about"
+                className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+              >
+                About
+              </Link>
+            </nav>
           </main>
         )}
       </div>

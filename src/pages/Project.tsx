@@ -8,6 +8,26 @@ import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+const MOLENHOF_MOBILE_IMAGES = {
+  begane: new URL("../../images/molenhof/begane-mobile.webp", import.meta.url).href,
+  eerste: new URL("../../images/molenhof/eerste-mobile.webp", import.meta.url).href,
+  gevels: new URL("../../images/molenhof/gevels-mobile.webp", import.meta.url).href,
+  doorsnedes: new URL("../../images/molenhof/doorsnedes-mobile.webp", import.meta.url).href,
+  fragment1: new URL("../../images/molenhof/fragment1-mobile.webp", import.meta.url).href,
+  fragment2: new URL("../../images/molenhof/fragment2-mobile.webp", import.meta.url).href,
+};
+
+const getMobileOptimizedMolenhofSrc = (src: string, isMobile: boolean, slug: string) => {
+  if (!isMobile || slug !== "nieuwe molenhof") return src;
+  if (src.includes("doorsnedes")) return MOLENHOF_MOBILE_IMAGES.doorsnedes;
+  if (src.includes("fragment1")) return MOLENHOF_MOBILE_IMAGES.fragment1;
+  if (src.includes("fragment2")) return MOLENHOF_MOBILE_IMAGES.fragment2;
+  if (src.includes("gevels")) return MOLENHOF_MOBILE_IMAGES.gevels;
+  if (src.includes("eerste")) return MOLENHOF_MOBILE_IMAGES.eerste;
+  if (src.includes("begane")) return MOLENHOF_MOBILE_IMAGES.begane;
+  return src;
+};
+
 type ZoomImageState = { src: string | string[]; alt: string };
 
 const computeSafeMaxZoom = (naturalWidth: number, naturalHeight: number) => {
@@ -397,6 +417,11 @@ const Project = () => {
               image.src.length >= 17 &&
               typeof firstSrc === "string" &&
               firstSrc.toLowerCase().includes("molenhof");
+            const isMolenhofASequence =
+              Array.isArray(image.src) &&
+              image.src.length === 3 &&
+              typeof firstSrc === "string" &&
+              firstSrc.toLowerCase().includes("molenhof/a1");
             const isMolenhofRenders =
               project.slug === "portraits-of-silence" &&
               Array.isArray(image.src) &&
@@ -406,6 +431,15 @@ const Project = () => {
             const isMolenhofSwipeCarousel = isMolenhofSequence || isMolenhofRenders;
             const isDetails = typeof firstSrc === "string" && (firstSrc.includes("detail1") || firstSrc.includes("detail2") || firstSrc.includes("detail3"));
             const isRenders = typeof firstSrc === "string" && (firstSrc.includes("render1") || firstSrc.includes("render2") || firstSrc.includes("render3") || firstSrc.includes("render4") || firstSrc.includes("render5"));
+            const isMolenhofLargeImage =
+              project.slug === "nieuwe molenhof" &&
+              typeof firstSrc === "string" &&
+              (firstSrc.includes("begane") ||
+                firstSrc.includes("eerste") ||
+                firstSrc.includes("gevels") ||
+                firstSrc.includes("doorsnedes") ||
+                firstSrc.includes("fragment1") ||
+                firstSrc.includes("fragment2"));
 
             const prev = index > 0 ? galleryItems[index - 1] : undefined;
             const prevFirstSrc = prev
@@ -427,7 +461,7 @@ const Project = () => {
 
             const outerClassName = isExpandedCarouselSlide
               ? "w-full"
-              : isMolenhofSequence
+              : isMolenhofSequence || isMolenhofASequence
                 ? "w-full md:w-[70%] md:mx-auto"
               : isPublicPoster
                 ? "w-[85%] md:w-[30%] mx-auto"
@@ -458,14 +492,22 @@ const Project = () => {
                             : "w-full";
 
             const wrapperClassName = `${outerClassName} ${extraTopSpaceClassName}`.trim();
+            const mobileMolenhofSpacingClassName = isMolenhofLargeImage ? "py-4" : "";
+            const wrapperClassWithSpacing = `${wrapperClassName} ${mobileMolenhofSpacingClassName}`.trim();
 
             return (
-              <div key={(image as { __key?: string }).__key ?? index} className={wrapperClassName}>
+              <div key={(image as { __key?: string }).__key ?? index} className={wrapperClassWithSpacing}>
+                {(() => {
+                  const renderedImageSrc = !Array.isArray(image.src)
+                    ? getMobileOptimizedMolenhofSrc(image.src, isMobile, project.slug)
+                    : image.src;
+
+                  return (
                 <div
                   className={frameClassName}
                   onClick={isZoomable ? () => openZoom(image.src as string, image.alt) : undefined}
                 >
-                  {Array.isArray(image.src) ? (
+                  {Array.isArray(renderedImageSrc) ? (
                     (() => {
                       const sloterdijkCarouselIsSmaller =
                         project.slug === "sloterdijk" &&
@@ -490,7 +532,7 @@ const Project = () => {
 
                       return (
                     <ImageCarousel
-                      images={image.src.map((src, slideIndex) => ({
+                      images={renderedImageSrc.map((src, slideIndex) => ({
                         src,
                         alt: image.alt,
                         caption: image.captions?.[slideIndex] ?? image.caption,
@@ -514,7 +556,7 @@ const Project = () => {
                     })()
                   ) : (
                     <OptimizedImage
-                      src={image.src}
+                      src={renderedImageSrc}
                       alt={image.alt}
                       className={
                         isExpandedCarouselSlide
@@ -533,6 +575,8 @@ const Project = () => {
                     />
                   )}
                 </div>
+                  );
+                })()}
 
                 {(() => {
                   if (Array.isArray(image.src)) return null;

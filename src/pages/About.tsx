@@ -14,8 +14,8 @@ const About = () => {
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24">
             {/* Portrait */}
-            <div className="relative">
-              <div className="relative aspect-[3/4] overflow-hidden sticky top-24">
+            <div className="relative self-start pt-8 lg:pt-16">
+              <div className="relative aspect-[3/4] overflow-hidden">
                 <OptimizedImage
                   src={about.portrait}
                   alt={siteConfig.name}
@@ -44,29 +44,14 @@ const About = () => {
                 {about.bio.map((paragraph, index) => (
                   <p
                     key={index}
-                    className="text-lg md:text-xl font-light leading-relaxed"
+                    className="text-[0.81rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground"
                   >
                     {paragraph}
                   </p>
                 ))}
               </div>
 
-              {/* Specialisaties */}
-              <div className="mb-16">
-                <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-                  Focus
-                </h2>
-                <div className="flex flex-wrap gap-3">
-                  {about.specializations.map((spec) => (
-                    <span
-                      key={spec}
-                      className="px-4 py-2 border border-border text-sm"
-                    >
-                      {spec}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              
 
               {/* Clients */}
               {about.clients && about.clients.length > 0 && (
@@ -80,6 +65,8 @@ const About = () => {
                 </div>
               )}
 
+              {/* Werkervaring & Opleidingen are shown below as two columns */}
+
               {/* Contact */}
               <div>
                 <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
@@ -88,23 +75,80 @@ const About = () => {
                 <div className="space-y-2">
                   <a
                     href={`mailto:${about.contact.email}`}
-                    className="block text-lg hover:opacity-60 transition-opacity duration-300"
+                    className="block text-[0.81rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground hover:opacity-60 transition-opacity duration-300"
                   >
                     {about.contact.email}
                   </a>
-                  <a
-                    href={`https://instagram.com/${about.contact.instagram.replace("@", "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block text-lg hover:opacity-60 transition-opacity duration-300"
-                  >
-                    {about.contact.instagram}
-                  </a>
+                  {about.contact.phone && (
+                    <a
+                      href={`tel:${about.contact.phone.replace(/\s+/g, "")}`}
+                      className="block text-[0.81rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground hover:opacity-60 transition-opacity duration-300"
+                    >
+                      {about.contact.phone}
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
+        {/* Two-column Work Experience & Education section placed after initial content */}
+        <section className="max-w-6xl mx-auto px-0 md:px-8 mb-20">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Work Experience Column */}
+            <div>
+              {about.workExperience && about.workExperience.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
+                    Werkervaring
+                  </h2>
+                  <div className="space-y-6">
+                    {about.workExperience.map((item) => (
+                      <div key={`${item.period}-${item.role}`} className="space-y-2">
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                          {item.period}
+                        </p>
+                        <h3 className="text-base md:text-lg font-medium leading-tight">
+                          {item.role}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">{item.company}</p>
+                        {item.description && item.description.length > 0 && (
+                          <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                            {item.description.map((line) => (
+                              <li key={line}>{line}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Education Column */}
+            <div>
+              {about.education && about.education.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
+                    Opleidingen
+                  </h2>
+                  <div className="space-y-6">
+                    {about.education.map((item) => (
+                      <div key={`${item.period}-${item.program}`} className="space-y-2">
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                          {item.period}
+                        </p>
+                        <h3 className="text-base md:text-lg font-medium leading-tight">{item.program}</h3>
+                        <p className="text-sm text-muted-foreground">{item.institution}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
