@@ -23,11 +23,14 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   tightFooter = false,
   arrowsOutside = false,
   slideAspectClassName,
-  hideArrowsOnMobile = false,
+  hideArrowsOnMobile = true,
   mobileSwipeHint,
   hidePagination = false,
-  compactPagination = false,
+  compactPagination = true,
 }) => {
+  // Enforce site-wide behavior: always hide arrows on mobile and always use compact (max 5) pagination
+  const effectiveHideArrowsOnMobile = true;
+  const effectiveCompactPagination = true;
   if (!images || images.length === 0) {
     return null;
   }
@@ -36,6 +39,41 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [slideCount, setSlideCount] = React.useState(images.length);
   const [paginationWindowStart, setPaginationWindowStart] = React.useState(0);
+  const [isReady, setIsReady] = React.useState(false);
+
+  React.useEffect(() => {
+    let isActive = true;
+    setIsReady(false);
+
+    const preloadImages = async () => {
+      await Promise.all(
+        images.map(
+          (image) =>
+            new Promise<void>((resolve) => {
+              const preload = new window.Image();
+
+              preload.onload = () => resolve();
+              preload.onerror = () => resolve();
+              preload.src = image.src;
+
+              if (preload.complete && preload.naturalWidth > 0) {
+                resolve();
+              }
+            })
+        )
+      );
+
+      if (isActive) {
+        setIsReady(true);
+      }
+    };
+
+    void preloadImages();
+
+    return () => {
+      isActive = false;
+    };
+  }, [images]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -60,7 +98,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   const aspectClass = slideAspectClassName ?? "aspect-[16/9]";
 
   React.useEffect(() => {
-    if (!compactPagination || slideCount <= 5) {
+    if (!effectiveCompactPagination || slideCount <= 5) {
       setPaginationWindowStart(0);
       return;
     }
@@ -79,10 +117,10 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
       return nextStart;
     });
-  }, [compactPagination, currentIndex, slideCount]);
+  }, [effectiveCompactPagination, currentIndex, slideCount]);
 
   const paginationIndexes = React.useMemo(() => {
-    if (!compactPagination || slideCount <= 5) {
+    if (!effectiveCompactPagination || slideCount <= 5) {
       return Array.from({ length: slideCount }, (_, index) => index);
     }
 
@@ -93,54 +131,58 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       paginationWindowStart + 3,
       paginationWindowStart + 4,
     ];
-  }, [compactPagination, paginationWindowStart, slideCount]);
+  }, [effectiveCompactPagination, paginationWindowStart, slideCount]);
 
   return (
     <div className={`w-full ${className ?? ""}`.trim()}>
-      <Carousel
-        setApi={setApi}
-        className={`w-full ${arrowsOutside ? "md:px-14" : ""}`.trim()}
-        opts={{ loop: true, dragFree: false }}
-      >
-        <CarouselContent>
-          {images.map((image, index) => (
-            <CarouselItem key={index}>
-              <div className={`${aspectClass} w-full overflow-hidden bg-background flex items-center justify-center ${slidePaddingClass}`}>
-                <OptimizedImage
-                  src={image.src}
-                  alt={image.alt}
-                  containerClassName="w-full h-full"
-                  className="w-full h-full object-contain"
-                  blurDataURL={getBlurPlaceholder(image.src)}
-                  draggable={false}
-                />
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious
-          variant="ghost"
-          className={
-            [
-              arrowsOutside
-                ? "absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
-                : "absolute left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent",
-              hideArrowsOnMobile ? "hidden md:flex" : "flex",
-            ].join(" ")
-          }
-        />
-        <CarouselNext
-          variant="ghost"
-          className={
-            [
-              arrowsOutside
-                ? "absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
-                : "absolute right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent",
-              hideArrowsOnMobile ? "hidden md:flex" : "flex",
-            ].join(" ")
-          }
-        />
-      </Carousel>
+      {isReady ? (
+        <Carousel
+          setApi={setApi}
+          className={`w-full ${arrowsOutside ? "md:px-14" : ""}`.trim()}
+          opts={{ loop: true, dragFree: false }}
+        >
+          <CarouselContent>
+            {images.map((image, index) => (
+              <CarouselItem key={index}>
+                <div className={`${aspectClass} w-full overflow-hidden bg-background flex items-center justify-center ${slidePaddingClass}`}>
+                  <OptimizedImage
+                    src={image.src}
+                    alt={image.alt}
+                    containerClassName="w-full h-full"
+                    className="w-full h-full object-contain"
+                    blurDataURL={getBlurPlaceholder(image.src)}
+                    draggable={false}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious
+            variant="ghost"
+            className={
+              [
+                arrowsOutside
+                  ? "absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
+                  : "absolute left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent",
+                effectiveHideArrowsOnMobile ? "hidden md:flex" : "flex",
+              ].join(" ")
+            }
+          />
+          <CarouselNext
+            variant="ghost"
+            className={
+              [
+                arrowsOutside
+                  ? "absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent"
+                  : "absolute right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none border-0 bg-transparent shadow-none text-foreground/80 hover:text-foreground hover:bg-transparent",
+                effectiveHideArrowsOnMobile ? "hidden md:flex" : "flex",
+              ].join(" ")
+            }
+          />
+        </Carousel>
+      ) : (
+        <div className={`${aspectClass} w-full overflow-hidden bg-muted/30`} />
+      )}
 
       {mobileSwipeHint ? (
         <div className="mt-2 flex items-center justify-center gap-2 text-muted-foreground motion-safe:animate-subtle-blink motion-reduce:animate-none md:hidden">
@@ -169,13 +211,13 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             const distanceFromActive = Math.abs(dotIndex - currentIndex);
             return (
               <span
-                key={compactPagination && slideCount > 5 ? slotIndex : dotIndex}
+                key={effectiveCompactPagination && slideCount > 5 ? slotIndex : dotIndex}
                 className={
                   distanceFromActive === 0
-                    ? "h-2 w-2 rounded-full bg-neutral-600 transition-all duration-200"
+                    ? "h-1.5 w-1.5 rounded-full bg-neutral-600 scale-100 transition-all duration-200"
                     : distanceFromActive === 1
-                      ? "h-1.5 w-1.5 rounded-full bg-neutral-500/75 transition-all duration-200"
-                      : "h-1.5 w-1.5 rounded-full bg-neutral-400/45 transition-all duration-200"
+                      ? "h-1.5 w-1.5 rounded-full bg-neutral-500/75 scale-90 transition-all duration-200"
+                      : "h-1.5 w-1.5 rounded-full bg-neutral-400/45 scale-75 transition-all duration-200"
                 }
                 aria-hidden="true"
               />

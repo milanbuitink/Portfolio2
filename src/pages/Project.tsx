@@ -346,7 +346,7 @@ const Project = () => {
             const galleryItems = galleryImages.flatMap((image, imageIndex) => {
               const firstImageSrc = Array.isArray(image.src) ? image.src[0] : image.src;
               const isMolenhofRendersInData =
-                project.slug === "portraits-of-silence" &&
+                project.slug === "nieuwe molenhof" &&
                 Array.isArray(image.src) &&
                 image.src.length === 7 &&
                 typeof firstImageSrc === "string" &&
@@ -356,8 +356,24 @@ const Project = () => {
                 image.src.length >= 17 &&
                 typeof firstImageSrc === "string" &&
                 firstImageSrc.toLowerCase().includes("molenhof");
+              const isMolenhofDSequenceInData =
+                Array.isArray(image.src) &&
+                typeof firstImageSrc === "string" &&
+                firstImageSrc.includes("molenhof/d");
+              const isMolenhofASequenceInData =
+                Array.isArray(image.src) &&
+                typeof firstImageSrc === "string" &&
+                firstImageSrc.toLowerCase().includes("molenhof/a1");
 
-              if (isMobile && Array.isArray(image.src) && !isMolenhofSequenceInData && !isMolenhofRendersInData) {
+              if (
+                isMobile &&
+                Array.isArray(image.src) &&
+                project.slug !== "nieuwe molenhof" &&
+                !isMolenhofSequenceInData &&
+                !isMolenhofRendersInData &&
+                !isMolenhofDSequenceInData &&
+                !isMolenhofASequenceInData
+              ) {
                 return image.src.map((src, slideIndex) => ({
                   ...image,
                   src,
@@ -419,16 +435,20 @@ const Project = () => {
               firstSrc.toLowerCase().includes("molenhof");
             const isMolenhofASequence =
               Array.isArray(image.src) &&
-              image.src.length === 3 &&
+              image.src.length === 4 &&
               typeof firstSrc === "string" &&
               firstSrc.toLowerCase().includes("molenhof/a1");
             const isMolenhofRenders =
-              project.slug === "portraits-of-silence" &&
+              project.slug === "nieuwe molenhof" &&
               Array.isArray(image.src) &&
               image.src.length === 7 &&
               typeof firstSrc === "string" &&
               firstSrc.includes("molenhof/render1");
-            const isMolenhofSwipeCarousel = isMolenhofSequence || isMolenhofRenders;
+            const isMolenhofDSequence =
+              Array.isArray(image.src) &&
+              typeof firstSrc === "string" &&
+              firstSrc.includes("molenhof/d");
+            const isMolenhofSwipeCarousel = isMolenhofSequence || isMolenhofASequence || isMolenhofRenders;
             const isDetails = typeof firstSrc === "string" && (firstSrc.includes("detail1") || firstSrc.includes("detail2") || firstSrc.includes("detail3"));
             const isRenders = typeof firstSrc === "string" && (firstSrc.includes("render1") || firstSrc.includes("render2") || firstSrc.includes("render3") || firstSrc.includes("render4") || firstSrc.includes("render5"));
             const isMolenhofLargeImage =
@@ -461,6 +481,10 @@ const Project = () => {
 
             const outerClassName = isExpandedCarouselSlide
               ? "w-full"
+              : isMolenhofRenders
+                ? "w-[85%] md:w-[85%] md:mx-auto"
+              : isMolenhofDSequence
+                ? "w-full md:w-[85%] md:mx-auto"
               : isMolenhofSequence || isMolenhofASequence
                 ? "w-full md:w-[70%] md:mx-auto"
               : isPublicPoster
@@ -509,6 +533,28 @@ const Project = () => {
                 >
                   {Array.isArray(renderedImageSrc) ? (
                     (() => {
+                      if (isMobile && isMolenhofRenders) {
+                        return (
+                          <div className="flex flex-col gap-4 items-center">
+                            {renderedImageSrc.map((src, slideIndex) => (
+                              <div
+                                key={src}
+                                className="aspect-[16/9] w-full overflow-hidden bg-background flex items-center justify-center"
+                              >
+                                <OptimizedImage
+                                  src={src}
+                                  alt={`${image.alt} ${slideIndex + 1}`}
+                                  containerClassName="w-full h-full"
+                                  className="w-full h-full object-contain"
+                                  blurDataURL={getBlurPlaceholder(src)}
+                                  draggable={false}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+
                       const sloterdijkCarouselIsSmaller =
                         project.slug === "sloterdijk" &&
                         typeof firstSrc === "string" &&
@@ -571,7 +617,7 @@ const Project = () => {
                                 : "project-image-quality w-full h-auto object-cover"
                             )
                       }
-                      blurDataURL={getBlurPlaceholder(image.src)}
+                      blurDataURL={getBlurPlaceholder(renderedImageSrc as string)}
                     />
                   )}
                 </div>

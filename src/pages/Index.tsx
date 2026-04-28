@@ -45,6 +45,7 @@ const Index = () => {
 
   const handleLoaderComplete = useCallback(() => {
     hasPlayedHomeLoader = true;
+    setIsContentRevealed(true);
     setIsLoaderComplete(true);
   }, []);
 
@@ -57,37 +58,35 @@ const Index = () => {
       <div
         className={
           isContentRevealed
-            ? "opacity-100 transition-opacity duration-500 ease-out"
-            : "opacity-0 pointer-events-none transition-opacity duration-500 ease-out"
+            ? "opacity-100 transition-opacity duration-200 ease-out"
+            : "opacity-0 pointer-events-none transition-opacity duration-200 ease-out"
         }
         aria-hidden={!isContentRevealed}
       >
         <Header />
 
-        {isLoaderComplete && (
-          <main className="min-h-[calc(100vh-6rem)] flex items-center justify-center px-6 md:px-8 pb-16 md:pb-20">
-            <nav className="w-full max-w-3xl text-center space-y-6 md:space-y-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              <Link
-                to="/project"
-                className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
-              >
-                Work
-              </Link>
-              <Link
-                to="/archive"
-                className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
-              >
-                Archive
-              </Link>
-              <Link
-                to="/about"
-                className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
-              >
-                About
-              </Link>
-            </nav>
-          </main>
-        )}
+        <main className="min-h-[calc(100vh-6rem)] flex items-center justify-center px-6 md:px-8 pb-16 md:pb-20">
+          <nav className="w-full max-w-3xl text-center space-y-6 md:space-y-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            <Link
+              to="/project"
+              className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            >
+              Work
+            </Link>
+            <Link
+              to="/archive"
+              className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            >
+              Archive
+            </Link>
+            <Link
+              to="/about"
+              className="block px-3 py-2 text-xs md:text-sm font-semibold tracking-widest uppercase hover:opacity-60 transition-opacity duration-300"
+            >
+              About
+            </Link>
+          </nav>
+        </main>
       </div>
     </div>
   );

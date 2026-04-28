@@ -47,7 +47,7 @@ export const projects: Project[] = [
   {
   id: "1",
     title: "NIEUWE MOLENHOF",
-    slug: "nieuwe molenhof",
+    slug: "nieuwemolenhof",
     description: "Intieme portretten die de stilte en kwetsbaarheid van het menselijk bestaan vastleggen.",
     year: "2024",
     category: "Hbo Afstudeerproject",
@@ -140,6 +140,23 @@ export const projects: Project[] = [
         alt: "Sloterdijk",
         width: "half",
       }),
+
+       {
+        src: [
+          new URL('../../images/molenhof/d1.png', import.meta.url).href,
+          new URL('../../images/molenhof/d2.png', import.meta.url).href,
+          new URL('../../images/molenhof/d3.png', import.meta.url).href,
+          new URL('../../images/molenhof/d4.png', import.meta.url).href,
+          new URL('../../images/molenhof/d5.png', import.meta.url).href,
+          new URL('../../images/molenhof/d6.png', import.meta.url).href,
+          new URL('../../images/molenhof/d7.png', import.meta.url).href,
+          new URL('../../images/molenhof/d8.png', import.meta.url).href,
+          new URL('../../images/molenhof/d9.png', import.meta.url).href,
+          new URL('../../images/molenhof/d10.png', import.meta.url).href,
+        ],
+        alt: "Molenhof beeldenreeks",
+        captions: [],
+      },
       
       {
         src: [
@@ -162,7 +179,7 @@ export const projects: Project[] = [
   },
   { id: "2",
     title: "TIMBER TUNES",
-    slug: "Timber-tunes",
+    slug: "Timbertunes",
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2024",
     category: "Premaster",
@@ -199,7 +216,6 @@ export const projects: Project[] = [
         alt: "Klimaat",
         captions: ["Zomer", "Winter"],
       },
-      { src: new URL('../../images/timbertunes/gevelfragment.png', import.meta.url).href, alt: "Eerste verdieping" },
       {
         src: [
           new URL('../../images/timbertunes/detail1.png', import.meta.url).href,
@@ -298,22 +314,22 @@ export const projects: Project[] = [
   {
     id: "4",
     title: "PUBLIC BUILDING",
-    slug: "natural-elements",
-    description: "De kracht en sereniteit van de natuur, vastgelegd in zijn meest pure vorm.",
+    slug: "Public Building",
+    description: "",
     year: "2023",
-    category: "Nature",
+    category: "MSc2",
     info: {
       jaar: "2025",
       programma: "Publiek gebouw",
       locatie: "Amsterdam",
       course: "Multiplicity and Identity",
-      studietijd: "8 weken",
+      studietijd: "10 weken",
       cijfer: "8,5",
     },
     thumbnail: new URL('../../images/public/def1.webp', import.meta.url).href,
     images: [
           
-      { src: new URL('../../images/public/axopublic.webp', import.meta.url).href, alt: "diagrams" },
+      { src: new URL('../../images/public/def1.webp', import.meta.url).href, alt: "diagrams" },
        zoomable({
         src: new URL('../../images/public/poster.png', import.meta.url).href,
         alt: "Sloterdijk",

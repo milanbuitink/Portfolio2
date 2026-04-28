@@ -72,38 +72,6 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
           defaults: { ease: "power3.out" },
         });
 
-        const nudgeTitleToHeader = () => {
-          if (window.matchMedia("(min-width: 901px)").matches) return;
-
-          const headerTitleEl = document.querySelector<HTMLElement>("[data-site-title]");
-          if (!headerTitleEl) return;
-
-          const headerRect = headerTitleEl.getBoundingClientRect();
-          const currentRect = titleEl.getBoundingClientRect();
-
-          if (currentRect.width <= 0 || currentRect.height <= 0) return;
-
-          const widthScaleFix = headerRect.width / currentRect.width;
-
-          if (
-            Number.isFinite(widthScaleFix) &&
-            Math.abs(widthScaleFix - 1) > 0.001
-          ) {
-            const currentScale = Number(gsap.getProperty(titleEl, "scale")) || 1;
-            gsap.set(titleEl, { scale: currentScale * widthScaleFix });
-          }
-
-          const rectAfterScale = titleEl.getBoundingClientRect();
-          const dx = headerRect.left - rectAfterScale.left;
-          const dy = headerRect.top - rectAfterScale.top;
-
-          if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
-            const currentX = Number(gsap.getProperty(titleEl, "x")) || 0;
-            const currentY = Number(gsap.getProperty(titleEl, "y")) || 0;
-            gsap.set(titleEl, { x: currentX + dx, y: currentY + dy });
-          }
-        };
-
         gsap.set(progressEl, {
           scaleX: 0,
           transformOrigin: "left center",
@@ -134,7 +102,8 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
           (headerRect?.height ?? 0) > 0;
 
         const snapX = canSnapToHeader ? (headerRect!.left - titleRect.left) : 0;
-        const snapY = canSnapToHeader ? (headerRect!.top - titleRect.top) : 0;
+        const desktopSnapYOffset = window.matchMedia("(min-width: 901px)").matches ? 8 : 0;
+        const snapY = canSnapToHeader ? (headerRect!.top - titleRect.top + desktopSnapYOffset) : 0;
         const snapScale = canSnapToHeader ? headerRect!.width / titleRect.width : 0.35;
 
         timeline
@@ -191,7 +160,6 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
             scale: snapScale,
             duration: 1.3,
             ease: "power4.out",
-            onComplete: nudgeTitleToHeader,
           })
           .to(
             imagesEl,
@@ -235,8 +203,10 @@ const HeroLoader = ({ onReveal, onComplete }: HeroLoaderProps) => {
     });
 
     const fontReady = fonts?.load
-      ? fonts
-          .load("500 16px Montserrat")
+      ? Promise.all([
+          fonts.load("500 16px Montserrat"),
+          fonts.load("700 16px Montserrat"),
+        ])
           .then(() => undefined)
           .catch(() => undefined)
       : fonts?.ready
