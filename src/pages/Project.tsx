@@ -364,11 +364,17 @@ const Project = () => {
                 Array.isArray(image.src) &&
                 typeof firstImageSrc === "string" &&
                 firstImageSrc.toLowerCase().includes("molenhof/a1");
+              const isTimberTunesCarouselGroup =
+                project.slug === "Timbertunes" &&
+                Array.isArray(image.src) &&
+                typeof firstImageSrc === "string" &&
+                (firstImageSrc.includes("ttklimaatz") || firstImageSrc.includes("detail1"));
 
               if (
                 isMobile &&
                 Array.isArray(image.src) &&
                 project.slug !== "nieuwe molenhof" &&
+                !isTimberTunesCarouselGroup &&
                 !isMolenhofSequenceInData &&
                 !isMolenhofRendersInData &&
                 !isMolenhofDSequenceInData &&
@@ -508,7 +514,7 @@ const Project = () => {
                     : isBeganeEerste
                       ? "w-full md:w-[85%] md:mx-auto"
                       : isDetails
-                        ? "w-[85%] mx-auto"
+                        ? (project.slug === "Timbertunes" && isMobile ? "w-full" : "w-[85%] mx-auto")
                         : isRenders
                           ? "w-[85%] mx-auto"
                           : image.width === "half"

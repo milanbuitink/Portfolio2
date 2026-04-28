@@ -179,7 +179,7 @@ export const projects: Project[] = [
   },
   { id: "2",
     title: "TIMBER TUNES",
-    slug: "Timbertunes",
+    slug: "timbertunes",
     description: "Een serie over de schoonheid van stedelijke architectuur en het contrast tussen oud en nieuw in de moderne stad.",
     year: "2024",
     category: "Premaster",
@@ -225,7 +225,7 @@ export const projects: Project[] = [
         alt: "Details",
         captions: [""],
       },
-       { src: new URL('../../images/timbertunes/krachtschema.jpg', import.meta.url).href, alt: "Architectuur" },
+      zoomable({ src: new URL('../../images/timbertunes/krachtschema.jpg', import.meta.url).href, alt: "Architectuur" }),
       {
         src: [
           new URL('../../images/timbertunes/render1.webp', import.meta.url).href,
@@ -261,9 +261,9 @@ export const projects: Project[] = [
       studietijd: "18 weken",
       cijfer: "8.0",
     },
-    thumbnail: new URL('../../images/sloterdijk/sloterdijkaxo.webp', import.meta.url).href,
+    thumbnail: new URL('../../images/sloterdijk/sloterdijkaxo.png', import.meta.url).href,
     images: [
-      { src: new URL('../../images/sloterdijk/sloterdijkaxo.webp', import.meta.url).href, alt: "Sloterdijk" },
+      { src: new URL('../../images/sloterdijk/sloterdijkaxo.png', import.meta.url).href, alt: "Sloterdijk" },
       { src: new URL('../../images/sloterdijk/principles.webp', import.meta.url).href, alt: "Stadsgezicht" },
       { src: new URL('../../images/sloterdijk/dwellingtypes.webp', import.meta.url).href, alt: "Stadsgezicht" },
        {
@@ -368,10 +368,10 @@ export const projects: Project[] = [
   {
     id: "5",
     title: "THESIS VIA ROMA",
-    slug: "MSc4",
-    description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
+    slug: "viaroma",
+    description: "",
     year: "2023",
-    category: "Abstract",
+    category: "MSc3",
     info: {
       jaar: "2023",
       programma: "Abstract",
@@ -399,17 +399,7 @@ export const projects: Project[] = [
         ],
         alt: "Thesis pagina's 1 t/m 20",
         captions: [
-          "Pagina 1",
-          "Pagina 2-3",
-          "Pagina 4-5",
-          "Pagina 6-7",
-          "Pagina 8-9",
-          "Pagina 10-11",
-          "Pagina 12-13",
-          "Pagina 14-15",
-          "Pagina 16-17",
-          "Pagina 18-19",
-          "Pagina 20",
+          "",
         ],
       },
     ],
@@ -418,10 +408,10 @@ export const projects: Project[] = [
   {
     id: "6",
     title: "GRADUATION TUD",
-    slug: "MSc",
+    slug: "graduation",
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
     year: "2023",
-    category: "Abstract",
+    category: "MSc4",
     info: {
       jaar: "2023",
       programma: "Abstract",
