@@ -316,8 +316,12 @@ export const projects: Project[] = [
     title: "PUBLIC BUILDING",
     slug: "Public Building",
     description: "",
-    year: "2023",
+    year: "2025",
     category: "MSc2",
+    subtext: [
+      "Dit vak bestond uit drie fasen. In de eerste fase ontwikkelden we een prototype, gebaseerd op het kernbegrip resilience (veerkracht). Deze veerkracht richtte zich op de gevolgen van klimaatverandering, zoals het urban hittegolven en het heat island effect, het fenomeen waarbij stedelijke gebieden warmer zijn dan hun omgeving door verharding en gebrek aan groen, evenals extreme neerslag en langdurige droogte.",
+      "Voor het ontwerpen van het prototype kregen we één week. In de tweede fase werd dit bouwprototype toegepast op twee verschillende locaties in Amsterdam. De context van deze locaties verschilde sterk, wat de opgave inhoudelijk uitdagend en relevant maakte.",
+    ],
     info: {
       jaar: "2025",
       programma: "Publiek gebouw",
@@ -335,7 +339,16 @@ export const projects: Project[] = [
         alt: "Sloterdijk",
         width: "half",
       }),
-       { src: new URL('../../images/public/diagram.webp', import.meta.url).href, alt: "Sloterdijk" },
+      {
+        src: [
+          new URL('../../images/public/proto1.jpeg', import.meta.url).href,
+          new URL('../../images/public/proto2.jpeg', import.meta.url).href,
+          new URL('../../images/public/proto3.jpeg', import.meta.url).href,
+        ],
+        alt: "Proto 1 t/m 3",
+        captions: [""],
+      },
+       { src: new URL('../../images/public/diagram.webp', import.meta.url).href, alt: "diagram" },
  
       {
         src: [
@@ -345,23 +358,43 @@ export const projects: Project[] = [
         alt: "Begane grond en 1e verdieping",
         captions: ["Begane grond", "Dak"],
       },
+
       {
         src: [
           new URL('../../images/public/def1.webp', import.meta.url).href,
           new URL('../../images/public/def2.webp', import.meta.url).href,
           new URL('../../images/public/section.webp', import.meta.url).href,
         ],
-        alt: "Def1, Def2 en Section",
+        alt: "",
         captions: [],
       },
-      {
+       {
         src: [
           new URL('../../images/public/1.webp', import.meta.url).href,
           new URL('../../images/public/2.webp', import.meta.url).href,
           new URL('../../images/public/3.webp', import.meta.url).href,
         ],
-        alt: "Carousel 1-3",
+        alt: "",
         captions: [],
+      },
+
+      {
+        src: [
+          new URL('../../images/public/begane1.png', import.meta.url).href,
+          new URL('../../images/public/eerste2.png', import.meta.url).href,
+        ],
+        alt: "",
+        captions: [],
+      },
+       { src: new URL('../../images/public/birdseye.png', import.meta.url).href, alt: "diagram" },
+       { src: new URL('../../images/public/axo.png', import.meta.url).href, alt: "diagram" },
+       {
+        src: [
+          new URL('../../images/public/render1.jpg', import.meta.url).href,
+          new URL('../../images/public/render2.jpg', import.meta.url).href,
+        ],
+        alt: "Renders",
+        captions: [""],
       },
     ],
   },
@@ -369,16 +402,20 @@ export const projects: Project[] = [
     id: "5",
     title: "THESIS VIA ROMA",
     slug: "viaroma",
-    description: "",
-    year: "2023",
+    description: "Thesis",
+    year: "2025",
     category: "MSc3",
+    subtext: [
+      "Voor deze thesis heb ik onderzocht hoe een architectonische ingreep zich kan verhouden tot een bestaande stedelijke structuur. De opgave vroeg om een helder concept dat ruimtelijke kwaliteit koppelt aan een zorgvuldig gekozen positionering in de context.",
+      "In de uitwerking lag de nadruk op het formuleren van een sterke hoofdopzet, waarin programma, routing en materialisatie elkaar ondersteunen. Het project combineert analyse en ontwerp tot een samenhangend voorstel dat zowel conceptueel als ruimtelijk overtuigt.",
+    ],
     info: {
-      jaar: "2023",
+      jaar: "2025",
       programma: "Abstract",
-      locatie: "",
-      course: "",
-      studietijd: "",
-      cijfer: "",
+      locatie: "Turijn, Italië",
+      course: "The Travalling Architect",
+      studietijd: "10 weken",
+      cijfer: "7,5",
     },
     thumbnail: new URL('../../images/thesis/thesis.webp', import.meta.url).href,
     images: [
@@ -412,19 +449,40 @@ export const projects: Project[] = [
     description: "Experimentele fotografie die de grenzen tussen realiteit en abstractie verkent.",
     year: "2023",
     category: "MSc4",
+    subtext: [
+      "Dit afstudeerproject onderzoekt de wisselwerking tussen beeld, compositie en abstractie. De serie is opgezet als een visuele studie waarin perspectief, ritme en contrast samen een eigen atmosferische logica vormen.",
+      "Bij de selectie en ordening van de beelden heb ik gezocht naar een reeks die inhoudelijk en visueel op elkaar reageert. Zo ontstaat een portfolio-onderdeel dat niet alleen losse beelden toont, maar ook de samenhang binnen het project laat zien.",
+    ],
     info: {
-      jaar: "2023",
-      programma: "Abstract",
-      locatie: "",
-      course: "",
-      studietijd: "",
-      cijfer: "",
+      jaar: "2026",
+      programma: "Afstudeerproject",
+      locatie: "Rotterdam",
+      course: "Ecologies of Inclusion",
+      studietijd: "30 weken",
+      cijfer: "n.t.b.",
     },
     thumbnail: new URL('../../images/graduationaxo.webp', import.meta.url).href,
     images: [
-      { src: new URL('../../images/graduationaxo.webp', import.meta.url).href , alt: "Abstract 1" },
-      { src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200&q=80", alt: "Abstract 2" },
-      { src: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=1200&q=80", alt: "Abstract 3" },
+      { src: new URL('../../images/graduationaxo.png', import.meta.url).href , alt: "Abstract 1" },
+      {
+        src: [
+          new URL('../../images/graduation/1.png', import.meta.url).href,
+          new URL('../../images/graduation/2.png', import.meta.url).href,
+          new URL('../../images/graduation/3.png', import.meta.url).href,
+        ],
+        alt: "Proto 1 t/m 3",
+        captions: [""],
+      },
+      {
+        src: [
+          new URL('../../images/graduation/a.png', import.meta.url).href,
+          new URL('../../images/graduation/b.png', import.meta.url).href,
+          new URL('../../images/graduation/c.png', import.meta.url).href,
+        ],
+        alt: "Proto 1 t/m 3",
+        captions: [""],
+      },
+
     ],
  
   },

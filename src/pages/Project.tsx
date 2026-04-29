@@ -421,21 +421,35 @@ const Project = () => {
             const isKlimaatSchema = typeof firstSrc === "string" && (firstSrc.includes("ttklimaatz") || firstSrc.includes("ttklimaatw"));
             const isBeganeEerste = typeof firstSrc === "string" && (firstSrc.includes("ttbegane") || firstSrc.includes("tteerste"));
             const isPublic123 =
-              project.slug === "natural-elements" &&
+              project.slug === "Public Building" &&
               typeof firstSrc === "string" &&
               (firstSrc.includes("public/1") || firstSrc.includes("/public/1") || firstSrc.includes("/1.webp") || firstSrc.includes("/1"));
             const isPublicDefSection =
-              project.slug === "natural-elements" &&
+              project.slug === "Public Building" &&
               typeof firstSrc === "string" &&
               (firstSrc.includes("public/def1") || firstSrc.includes("public/def2") || firstSrc.includes("public/section") || firstSrc.includes("def1") || firstSrc.includes("def2") || firstSrc.includes("section"));
-            const isPublicDiagram =
-              project.slug === "natural-elements" &&
+            const isPublicRenders =
+              project.slug === "Public Building" &&
+              Array.isArray(image.src) &&
               typeof firstSrc === "string" &&
-              (firstSrc.includes("public/diagram") || firstSrc.includes("/diagram") || firstSrc.includes("diagram"));
+              firstSrc.includes("public/render");
+            const isPublicDiagram =
+              typeof firstSrc === "string" &&
+              firstSrc.includes("public/diagram");
             const isPublicPoster =
-              project.slug === "natural-elements" &&
               typeof firstSrc === "string" &&
               firstSrc.includes("public/poster");
+            const isPublicBirdseye =
+              typeof firstSrc === "string" &&
+              firstSrc.includes("public/birdseye");
+            const isPublicAxo =
+              typeof firstSrc === "string" &&
+              firstSrc.includes("public/axo");
+            const isPublicPrototypeCarousel =
+              project.slug === "Public Building" &&
+              Array.isArray(image.src) &&
+              typeof firstSrc === "string" &&
+              firstSrc.includes("public/1");
             const isMolenhofSequence =
               Array.isArray(image.src) &&
               image.src.length >= 17 &&
@@ -456,6 +470,11 @@ const Project = () => {
               Array.isArray(image.src) &&
               typeof firstSrc === "string" &&
               firstSrc.includes("molenhof/d");
+            const isGraduationABC =
+              project.slug === "graduation" &&
+              Array.isArray(image.src) &&
+              typeof firstSrc === "string" &&
+              firstSrc.toLowerCase().includes("graduation/a");
             const isMolenhofSwipeCarousel = isMolenhofSequence || isMolenhofASequence || isMolenhofRenders;
             const isDetails = typeof firstSrc === "string" && (firstSrc.includes("detail1") || firstSrc.includes("detail2") || firstSrc.includes("detail3"));
             const isRenders = typeof firstSrc === "string" && (firstSrc.includes("render1") || firstSrc.includes("render2") || firstSrc.includes("render3") || firstSrc.includes("render4") || firstSrc.includes("render5"));
@@ -473,8 +492,14 @@ const Project = () => {
             const prevFirstSrc = prev
               ? (Array.isArray(prev.src) ? prev.src[0] : prev.src)
               : undefined;
+            const next = index < galleryItems.length - 1 ? galleryItems[index + 1] : undefined;
+            const nextFirstSrc = next
+              ? (Array.isArray(next.src) ? next.src[0] : next.src)
+              : undefined;
             const prevIsKlimaatSchema = typeof prevFirstSrc === "string" && (prevFirstSrc.includes("ttklimaatz") || prevFirstSrc.includes("ttklimaatw"));
             const prevIsDetails = typeof prevFirstSrc === "string" && (prevFirstSrc.includes("detail1") || prevFirstSrc.includes("detail2") || prevFirstSrc.includes("detail3"));
+            const prevIsProtoCarousel = typeof prevFirstSrc === "string" && (prevFirstSrc.includes("public/proto") || prevFirstSrc.includes("proto1") || prevFirstSrc.includes("/1.webp") || prevFirstSrc.includes("/public/1") || prevFirstSrc.endsWith("/1"));
+            const prevIsPublic123 = typeof prevFirstSrc === "string" && (prevFirstSrc.includes("public/1") || prevFirstSrc.includes("/public/1") || prevFirstSrc.includes("/1.webp") || prevFirstSrc.includes("/1"));
 
             const extraTopSpaceClassName = (isGevelfragment && prevIsKlimaatSchema) || (isKrachtschema && prevIsDetails)
               ? "pt-4 md:pt-8"
@@ -490,17 +515,21 @@ const Project = () => {
             const outerClassName = isExpandedCarouselSlide
               ? "w-full"
               : isMolenhofRenders
-                ? "w-[85%] md:w-[85%] md:mx-auto"
+                ? "w-[85%] md:w-[85%] mx-auto"
+              : isGraduationABC
+                ? "w-[50%] md:w-[50%] mx-auto"
               : isMolenhofDSequence
                 ? "w-full md:w-[85%] md:mx-auto"
               : isMolenhofSequence || isMolenhofASequence
                 ? "w-full md:w-[70%] md:mx-auto"
               : isPublicPoster
-                ? "w-[85%] md:w-[30%] mx-auto"
-              : isPublic123 || isPublicDefSection
-                ? "w-full md:w-[75%] md:mx-auto"
-                : isPublicDiagram
-                  ? "w-full md:w-[56%] md:mx-auto"
+                ? "w-[85%] md:w-[40%] mx-auto"
+              : isPublic123 || isPublicDefSection || isPublicRenders
+                ? "w-full md:w-[72%] md:mx-auto"
+                  : isPublicDiagram
+                  ? "w-full md:w-[83%] md:mx-auto"
+                  : isPublicBirdseye || isPublicAxo
+                  ? "w-full md:w-[64%] md:mx-auto"
                   : isSloterdijkFragment
                 ? "w-full md:w-1/2 md:mx-auto"
                 : isSloterdijkDiagram
@@ -552,8 +581,8 @@ const Project = () => {
                                 <OptimizedImage
                                   src={src}
                                   alt={`${image.alt} ${slideIndex + 1}`}
-                                  containerClassName="w-full h-full"
-                                  className="w-full h-full object-contain"
+                                  containerClassName="w-full h-auto flex items-center justify-center"
+                                  className="max-w-full max-h-full object-contain"
                                   blurDataURL={getBlurPlaceholder(src)}
                                   draggable={false}
                                 />
@@ -571,6 +600,7 @@ const Project = () => {
                           firstSrc.includes("/25") ||
                           firstSrc.includes("/68") ||
                           firstSrc.includes("/911") ||
+                          !isPublicPrototypeCarousel &&
                           firstSrc.includes("gallery") ||
                           firstSrc.includes("corridor") ||
                           firstSrc.includes("maisonette") ||
@@ -652,6 +682,26 @@ const Project = () => {
                     </p>
                   );
                 })()}
+
+                {isPublicDiagram && prevIsProtoCarousel ? (
+                  <div className="w-full px-4 md:px-8 my-6 md:my-12">
+                    <div className="w-full md:w-1/2 mx-auto">
+                      <p className="text-[0.75rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground">
+                        In deze fase wordt het prototype doorontwikkeld tot een gebouw. Het eerste ontwerp betreft een klimaatmuseum op het Stenen Hoofd, een markante locatie aan het IJ. Door de trapsgewijze overgang naar het water en de groene, beloopbare daken gaat het gebouw op in zijn omgeving. Het ontwerp behoudt daarmee het bestaande karakter van het gebied als informele wandelplek: het daklandschap blijft toegankelijk en functioneert, net als in de huidige situatie, als onderdeel van het publieke domein.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {isPublicBirdseye && prevIsPublic123 ? (
+                  <div className="w-full px-4 md:px-8 my-6 md:my-12">
+                    <div className="w-full md:w-1/2 mx-auto">
+                      <p className="text-[0.75rem] md:text-[0.9rem] font-light leading-relaxed text-muted-foreground">
+                        De tweede locatie bevindt zich in het centrum van Amsterdam en betreft het Vlaams Cultuurhuis de Brakke Grond. Deze instelling kampt al geruime tijd met een ruimtetekort en heeft studenten gevraagd om met innovatieve voorstellen te komen voor uitbreiding. Het integreren van het prototype op deze locatie bleek complexer door de dichte stedelijke context. Desondanks blijft het concept herkenbaar aanwezig, met name in het groene dakterras en de belangrijke looproutes over het dak. Hiermee wordt extra ruimte gecreëerd, terwijl het gebouw ook een publiek toegankelijk daklandschap toevoegt aan de binnenstad.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             );
             });

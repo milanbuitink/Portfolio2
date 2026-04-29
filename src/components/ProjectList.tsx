@@ -8,11 +8,23 @@ import { Observer } from "gsap/all";
 
 gsap.registerPlugin(Observer);
 
+const LAST_MOBILE_PROJECT_KEY = "portfolio:last-mobile-project-slug";
+
+const getRestoredMobileStartIndex = () => {
+  if (typeof window === "undefined") return 0;
+
+  const storedSlug = window.sessionStorage.getItem(LAST_MOBILE_PROJECT_KEY);
+  if (!storedSlug) return 0;
+
+  const projectIndex = projects.findIndex((project) => project.slug === storedSlug);
+  return projectIndex >= 0 ? projectIndex + 1 : 0;
+};
+
 // ─── Mobile: GSAP Observer-driven fullscreen vertical swipe ───────────────
 const MobileSwipePortfolio = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const sectionsRef = useRef<HTMLDivElement[]>([]);
-  const currentIndex = useRef(0);
+  const currentIndex = useRef(getRestoredMobileStartIndex());
   const animating = useRef(false);
   const navigate = useNavigate();
 
@@ -26,6 +38,8 @@ const MobileSwipePortfolio = () => {
     const sections = sectionsRef.current;
     if (sections.length === 0) return;
 
+    const startIndex = Math.min(currentIndex.current, sections.length - 1);
+
     // Lock the viewport
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
@@ -34,6 +48,7 @@ const MobileSwipePortfolio = () => {
     sections.forEach((section, i) => {
       const img = section.querySelector<HTMLElement>(".swipe-img");
       const title = section.querySelector<HTMLElement>(".swipe-title");
+      const isVisible = i === startIndex;
 
       gsap.set(section, {
         position: "absolute",
@@ -41,12 +56,12 @@ const MobileSwipePortfolio = () => {
         left: 0,
         width: "100%",
         height: "100%",
-        zIndex: i === 0 ? 1 : 0,
-        visibility: i === 0 ? "visible" : "hidden",
+        zIndex: isVisible ? 1 : 0,
+        visibility: isVisible ? "visible" : "hidden",
         willChange: "transform",
       });
 
-      if (i === 0) {
+      if (isVisible) {
         // First section starts revealed
         gsap.set(img, { clipPath: "inset(0% 0% 0% 0%)" });
         gsap.set(title, { opacity: 1, y: 0 });
@@ -74,6 +89,12 @@ const MobileSwipePortfolio = () => {
         onComplete: () => {
           gsap.set(leaving, { visibility: "hidden", zIndex: 0 });
           currentIndex.current = index;
+          const activeProject = projects[index - 1];
+          if (activeProject) {
+            window.sessionStorage.setItem(LAST_MOBILE_PROJECT_KEY, activeProject.slug);
+          } else {
+            window.sessionStorage.removeItem(LAST_MOBILE_PROJECT_KEY);
+          }
           animating.current = false;
         },
       });
@@ -201,6 +222,7 @@ const MobileSwipePortfolio = () => {
             <Link
               to={`/project/${project.slug}`}
               state={{ fromProjectList: true }}
+              onClick={() => window.sessionStorage.setItem(LAST_MOBILE_PROJECT_KEY, project.slug)}
               className="pointer-events-auto"
             >
               <h3
