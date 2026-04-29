@@ -8,6 +8,8 @@ import { getBlurPlaceholder } from "@/lib/blur-utils";
 import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+const MOLENHOF_SLUG = "nieuwemolenhof";
+
 const MOLENHOF_MOBILE_IMAGES = {
   begane: new URL("../../images/molenhof/begane-mobile.webp", import.meta.url).href,
   eerste: new URL("../../images/molenhof/eerste-mobile.webp", import.meta.url).href,
@@ -18,7 +20,7 @@ const MOLENHOF_MOBILE_IMAGES = {
 };
 
 const getMobileOptimizedMolenhofSrc = (src: string, isMobile: boolean, slug: string) => {
-  if (!isMobile || slug !== "nieuwe molenhof") return src;
+  if (!isMobile || slug !== MOLENHOF_SLUG) return src;
   if (src.includes("doorsnedes")) return MOLENHOF_MOBILE_IMAGES.doorsnedes;
   if (src.includes("fragment1")) return MOLENHOF_MOBILE_IMAGES.fragment1;
   if (src.includes("fragment2")) return MOLENHOF_MOBILE_IMAGES.fragment2;
@@ -346,7 +348,7 @@ const Project = () => {
             const galleryItems = galleryImages.flatMap((image, imageIndex) => {
               const firstImageSrc = Array.isArray(image.src) ? image.src[0] : image.src;
               const isMolenhofRendersInData =
-                project.slug === "nieuwe molenhof" &&
+                project.slug === MOLENHOF_SLUG &&
                 Array.isArray(image.src) &&
                 image.src.length === 7 &&
                 typeof firstImageSrc === "string" &&
@@ -373,7 +375,7 @@ const Project = () => {
               if (
                 isMobile &&
                 Array.isArray(image.src) &&
-                project.slug !== "nieuwe molenhof" &&
+                project.slug !== MOLENHOF_SLUG &&
                 !isTimberTunesCarouselGroup &&
                 !isMolenhofSequenceInData &&
                 !isMolenhofRendersInData &&
@@ -445,7 +447,7 @@ const Project = () => {
               typeof firstSrc === "string" &&
               firstSrc.toLowerCase().includes("molenhof/a1");
             const isMolenhofRenders =
-              project.slug === "nieuwe molenhof" &&
+              project.slug === MOLENHOF_SLUG &&
               Array.isArray(image.src) &&
               image.src.length === 7 &&
               typeof firstSrc === "string" &&
@@ -458,7 +460,7 @@ const Project = () => {
             const isDetails = typeof firstSrc === "string" && (firstSrc.includes("detail1") || firstSrc.includes("detail2") || firstSrc.includes("detail3"));
             const isRenders = typeof firstSrc === "string" && (firstSrc.includes("render1") || firstSrc.includes("render2") || firstSrc.includes("render3") || firstSrc.includes("render4") || firstSrc.includes("render5"));
             const isMolenhofLargeImage =
-              project.slug === "nieuwe molenhof" &&
+              project.slug === MOLENHOF_SLUG &&
               typeof firstSrc === "string" &&
               (firstSrc.includes("begane") ||
                 firstSrc.includes("eerste") ||
