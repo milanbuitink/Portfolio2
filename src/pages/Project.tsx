@@ -218,6 +218,8 @@ const Project = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const isTouchLikeViewport = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+  const useMobileImageLayout = isMobile && isTouchLikeViewport;
   const project = slug ? getProjectBySlug(slug) : undefined;
   const { prev, next } = slug ? getAdjacentProjects(slug) : { prev: null, next: null };
   const [zoomImage, setZoomImage] = useState<ZoomImageState | null>(null);
@@ -373,7 +375,7 @@ const Project = () => {
                 (firstImageSrc.includes("ttklimaatz") || firstImageSrc.includes("detail1"));
 
               if (
-                isMobile &&
+                useMobileImageLayout &&
                 Array.isArray(image.src) &&
                 project.slug !== MOLENHOF_SLUG &&
                 !isTimberTunesCarouselGroup &&
@@ -505,10 +507,10 @@ const Project = () => {
               ? "pt-4 md:pt-8"
               : "";
 
-            const isExpandedCarouselSlide = isMobile && (image as { __fromCarousel?: boolean }).__fromCarousel;
+            const isExpandedCarouselSlide = useMobileImageLayout && (image as { __fromCarousel?: boolean }).__fromCarousel;
 
             const shouldMobileZoomToFill =
-              isMobile &&
+              useMobileImageLayout &&
               typeof firstSrc === "string" &&
               (firstSrc.includes("ttbegane") || firstSrc.includes("tteerste") || firstSrc.includes("gevelfragment"));
 
@@ -537,7 +539,7 @@ const Project = () => {
                   : isSloterdijkKlimaat
                     ? "w-full md:w-1/2 md:mx-auto"
                 : isGevelfragment
-                ? (isMobile ? "w-full" : "w-4/5 mx-auto")
+                  ? (useMobileImageLayout ? "w-full" : "w-4/5 mx-auto")
                 : isKrachtschema
                   ? "w-[85%] md:w-[45%] mx-auto"
                   : isKlimaatSchema
@@ -545,7 +547,7 @@ const Project = () => {
                     : isBeganeEerste
                       ? "w-full md:w-[85%] md:mx-auto"
                       : isDetails
-                        ? (project.slug === "Timbertunes" && isMobile ? "w-full" : "w-[85%] mx-auto")
+                          ? (project.slug === "Timbertunes" && useMobileImageLayout ? "w-full" : "w-[85%] mx-auto")
                         : isRenders
                           ? "w-[85%] mx-auto"
                           : image.width === "half"
@@ -570,7 +572,7 @@ const Project = () => {
                 >
                   {Array.isArray(renderedImageSrc) ? (
                     (() => {
-                      if (isMobile && isMolenhofRenders) {
+                      if (useMobileImageLayout && isMolenhofRenders) {
                         return (
                           <div className="flex flex-col gap-4 items-center">
                             {renderedImageSrc.map((src, slideIndex) => (

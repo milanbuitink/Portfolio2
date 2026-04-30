@@ -196,9 +196,9 @@ export const projects: Project[] = [
       studietijd: "7 weken",
       cijfer: "8.0",
     },
-    thumbnail: new URL('../../images/timbertunes/Timbertunes.webp', import.meta.url).href,
+    thumbnail: new URL('../../images/timbertunes/timbertunes.webp', import.meta.url).href,
     images: [
-      { src: new URL('../../images/timbertunes/Timbertunes.webp', import.meta.url).href, alt: "Stadsgezicht" },
+      { src: new URL('../../images/timbertunes/timbertunes.webp', import.meta.url).href, alt: "Stadsgezicht" },
       { src: new URL('../../images/timbertunes/ttvisie.png', import.meta.url).href, alt: "Visie", width: "half" },
       { 
         src: [
@@ -229,11 +229,11 @@ export const projects: Project[] = [
       {
         src: [
           new URL('../../images/timbertunes/render1.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render2.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render3.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render4.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/render5.webp', import.meta.url).href,
-          new URL('../../images/timbertunes/ttmodel.webp', import.meta.url).href,
+          new URL('../../images/timbertunes/render2.jpg', import.meta.url).href,
+          new URL('../../images/timbertunes/render3.jpg', import.meta.url).href,
+          new URL('../../images/timbertunes/render4.jpg', import.meta.url).href,
+          new URL('../../images/timbertunes/render5.jpg', import.meta.url).href,
+          new URL('../../images/timbertunes/ttmodel.jpg', import.meta.url).href,
           new URL('../../images/timbertunes/qr.webp', import.meta.url).href,
         ],
         alt: "Renders",
